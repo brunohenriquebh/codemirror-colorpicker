@@ -21,79 +21,87 @@ var CodeMirrorColorPicker = (function () {
  * @returns {*}
  */
 function format(obj, type) {
-    var defaultColor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'rgba(0, 0, 0, 0)';
+  var defaultColor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'rgba(0, 0, 0, 0)';
 
+  if (Array.isArray(obj)) {
+    obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
+  }
 
-    if (Array.isArray(obj)) {
-        obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
-    }
+  if (type == 'hex') {
+    return hex(obj);
+  } else if (type == 'rgb') {
+    return rgb(obj, defaultColor);
+  } else if (type == 'hsl') {
+    return hsl(obj);
+  }
 
-    if (type == 'hex') {
-        return hex(obj);
-    } else if (type == 'rgb') {
-        return rgb(obj, defaultColor);
-    } else if (type == 'hsl') {
-        return hsl(obj);
-    }
-
-    return obj;
+  return obj;
 }
 
 function hex(obj) {
-    if (Array.isArray(obj)) {
-        obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
-    }
+  if (Array.isArray(obj)) {
+    obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
+  }
 
-    var r = obj.r.toString(16);
-    if (obj.r < 16) r = "0" + r;
+  var r = obj.r.toString(16);
+  if (obj.r < 16) r = '0' + r;
 
-    var g = obj.g.toString(16);
-    if (obj.g < 16) g = "0" + g;
+  var g = obj.g.toString(16);
+  if (obj.g < 16) g = '0' + g;
 
-    var b = obj.b.toString(16);
-    if (obj.b < 16) b = "0" + b;
+  var b = obj.b.toString(16);
+  if (obj.b < 16) b = '0' + b;
 
+  var a = Math.round(255 * obj.a).toString(16);
+  if (obj.a < 0.07) a = '0' + a;
+
+  //console.log(obj.a + ':' + a)
+
+  if (obj.a == 1 || typeof obj.a == 'undefined') {
     return '#' + r + g + b;
+  } else {
+    return '#' + r + g + b + a;
+  }
 }
 
 function rgb(obj) {
-    var defaultColor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'rgba(0, 0, 0, 0)';
+  var defaultColor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'rgba(0, 0, 0, 0)';
 
-    if (Array.isArray(obj)) {
-        obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
-    }
+  if (Array.isArray(obj)) {
+    obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
+  }
 
-    if (typeof obj == 'undefined') {
-        return undefined;
-    }
+  if (typeof obj == 'undefined') {
+    return undefined;
+  }
 
-    if (obj.a == 1 || typeof obj.a == 'undefined') {
-        if (isNaN(obj.r)) {
-            return defaultColor;
-        }
-        return 'rgb(' + obj.r + ',' + obj.g + ',' + obj.b + ')';
-    } else {
-        return 'rgba(' + obj.r + ',' + obj.g + ',' + obj.b + ',' + obj.a + ')';
+  if (obj.a == 1 || typeof obj.a == 'undefined') {
+    if (isNaN(obj.r)) {
+      return defaultColor;
     }
+    return 'rgb(' + obj.r + ',' + obj.g + ',' + obj.b + ')';
+  } else {
+    return 'rgba(' + obj.r + ',' + obj.g + ',' + obj.b + ',' + obj.a + ')';
+  }
 }
 
 function hsl(obj) {
-    if (Array.isArray(obj)) {
-        obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
-    }
+  if (Array.isArray(obj)) {
+    obj = { r: obj[0], g: obj[1], b: obj[2], a: obj[3] };
+  }
 
-    if (obj.a == 1 || typeof obj.a == 'undefined') {
-        return 'hsl(' + obj.h + ',' + obj.s + '%,' + obj.l + '%)';
-    } else {
-        return 'hsla(' + obj.h + ',' + obj.s + '%,' + obj.l + '%,' + obj.a + ')';
-    }
+  if (obj.a == 1 || typeof obj.a == 'undefined') {
+    return 'hsl(' + obj.h + ',' + obj.s + '%,' + obj.l + '%)';
+  } else {
+    return 'hsla(' + obj.h + ',' + obj.s + '%,' + obj.l + '%,' + obj.a + ')';
+  }
 }
 
 var formatter = {
-    format: format,
-    rgb: rgb,
-    hsl: hsl,
-    hex: hex
+  format: format,
+  rgb: rgb,
+  hsl: hsl,
+  hex: hex
 };
 
 function round(n, k) {
@@ -158,6 +166,18 @@ var math = {
     caculateAngle: caculateAngle
 };
 
+/**
+ * @method RGBtoHSV
+ *
+ * convert rgb to hsv
+ *
+ * 		color.RGBtoHSV(0, 0, 255) === { h : 240, s : 1, v : 1 } === '#FFFF00'
+ *
+ * @param {Number} R  red color value
+ * @param {Number} G  green color value
+ * @param {Number} B  blue color value
+ * @return {Object}  hsv color code
+ */
 function RGBtoHSV(r, g, b) {
 
     if (arguments.length == 1) {
@@ -469,6 +489,18 @@ var fromLAB = {
     LABtoXYZ: LABtoXYZ
 };
 
+/**
+ * @method HSVtoRGB
+ *
+ * convert hsv to rgb
+ *
+ * 		color.HSVtoRGB(0,0,1) === #FFFFF === { r : 255, g : 0, b : 0 }
+ *
+ * @param {Number} H  hue color number  (min : 0, max : 360)
+ * @param {Number} S  Saturation number  (min : 0, max : 1)
+ * @param {Number} V  Value number 		(min : 0, max : 1 )
+ * @returns {Object}
+ */
 function HSVtoRGB(h, s, v) {
 
     if (arguments.length == 1) {
@@ -807,78 +839,77 @@ var toConsumableArray = function (arr) {
   }
 };
 
-var color_regexp = /(#(?:[\da-f]{3}){1,2}|rgb\((?:\s*\d{1,3},\s*){2}\d{1,3}\s*\)|rgba\((?:\s*\d{1,3},\s*){3}\d*\.?\d+\s*\)|hsl\(\s*\d{1,3}(?:,\s*\d{1,3}%){2}\s*\)|hsla\(\s*\d{1,3}(?:,\s*\d{1,3}%){2},\s*\d*\.?\d+\s*\)|([\w_\-]+))/gi;
-var color_split = ',';
+var color_regexp = /(#(?:[\da-f]{8})|#(?:[\da-f]{3}){1,2}|rgb\((?:\s*\d{1,3},\s*){2}\d{1,3}\s*\)|rgba\((?:\s*\d{1,3},\s*){3}\d*\.?\d+\s*\)|hsl\(\s*\d{1,3}(?:,\s*\d{1,3}%){2}\s*\)|hsla\(\s*\d{1,3}(?:,\s*\d{1,3}%){2},\s*\d*\.?\d+\s*\)|([\w_\-]+))/gi;
+var color_split = ",";
 
 function matches(str) {
-    var matches = str.match(color_regexp);
-    var result = [];
+  var matches = str.match(color_regexp);
+  var result = [];
 
-    if (!matches) {
-        return result;
-    }
-
-    for (var i = 0, len = matches.length; i < len; i++) {
-
-        if (matches[i].indexOf('#') > -1 || matches[i].indexOf('rgb') > -1 || matches[i].indexOf('hsl') > -1) {
-            result.push({ color: matches[i] });
-        } else {
-            var nameColor = ColorNames.getColorByName(matches[i]);
-
-            if (nameColor) {
-                result.push({ color: matches[i], nameColor: nameColor });
-            }
-        }
-    }
-
-    var pos = { next: 0 };
-    result.forEach(function (item) {
-        var startIndex = str.indexOf(item.color, pos.next);
-
-        item.startIndex = startIndex;
-        item.endIndex = startIndex + item.color.length;
-
-        pos.next = item.endIndex;
-    });
-
+  if (!matches) {
     return result;
+  } //
+
+  for (var i = 0, len = matches.length; i < len; i++) {
+    if (matches[i].indexOf("#") > -1 || matches[i].indexOf("rgb") > -1 || matches[i].indexOf("hsl") > -1) {
+      result.push({ color: matches[i] });
+    } else {
+      var nameColor = ColorNames.getColorByName(matches[i]);
+
+      if (nameColor) {
+        result.push({ color: matches[i], nameColor: nameColor });
+      }
+    }
+  }
+
+  var pos = { next: 0 };
+  result.forEach(function (item) {
+    var startIndex = str.indexOf(item.color, pos.next);
+
+    item.startIndex = startIndex;
+    item.endIndex = startIndex + item.color.length;
+
+    pos.next = item.endIndex;
+  });
+
+  return result;
 }
 
 function convertMatches(str) {
-    var m = matches(str);
+  var m = matches(str);
 
-    m.forEach(function (it, index) {
-        str = str.replace(it.color, '@' + index);
-    });
+  m.forEach(function (it, index) {
+    str = str.replace(it.color, "@" + index);
+  });
 
-    return { str: str, matches: m };
+  return { str: str, matches: m };
 }
 
 function convertMatchesArray(str) {
-    var splitStr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
+  var splitStr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ",";
 
-    var ret = convertMatches(str);
-    return ret.str.split(splitStr).map(function (it, index) {
-        it = trim(it);
+  var ret = convertMatches(str);
+  return ret.str.split(splitStr).map(function (it, index) {
+    it = trim(it);
 
-        if (ret.matches[index]) {
-            it = it.replace('@' + index, ret.matches[index].color);
-        }
+    if (ret.matches[index]) {
+      it = it.replace("@" + index, ret.matches[index].color);
+    }
 
-        return it;
-    });
+    return it;
+  });
 }
 
 function reverseMatches(str, matches) {
-    matches.forEach(function (it, index) {
-        str = str.replace('@' + index, it.color);
-    });
+  matches.forEach(function (it, index) {
+    str = str.replace("@" + index, it.color);
+  });
 
-    return str;
+  return str;
 }
 
 function trim(str) {
-    return str.replace(/^\s+|\s+$/g, '');
+  return str.replace(/^\s+|\s+$/g, "");
 }
 
 /**
@@ -896,196 +927,205 @@ function trim(str) {
  * @returns {Object}  rgb object
  */
 function parse(str) {
-    if (typeof str == 'string') {
-
-        if (ColorNames.isColorName(str)) {
-            str = ColorNames.getColorByName(str);
-        }
-
-        if (str.indexOf("rgb(") > -1) {
-            var arr = str.replace("rgb(", "").replace(")", "").split(",");
-
-            for (var i = 0, len = arr.length; i < len; i++) {
-                arr[i] = parseInt(trim(arr[i]), 10);
-            }
-
-            var obj = { type: 'rgb', r: arr[0], g: arr[1], b: arr[2], a: 1 };
-
-            obj = Object.assign(obj, RGBtoHSL(obj));
-
-            return obj;
-        } else if (str.indexOf("rgba(") > -1) {
-            var arr = str.replace("rgba(", "").replace(")", "").split(",");
-
-            for (var i = 0, len = arr.length; i < len; i++) {
-
-                if (len - 1 == i) {
-                    arr[i] = parseFloat(trim(arr[i]));
-                } else {
-                    arr[i] = parseInt(trim(arr[i]), 10);
-                }
-            }
-
-            var obj = { type: 'rgb', r: arr[0], g: arr[1], b: arr[2], a: arr[3] };
-
-            obj = Object.assign(obj, RGBtoHSL(obj));
-
-            return obj;
-        } else if (str.indexOf("hsl(") > -1) {
-            var arr = str.replace("hsl(", "").replace(")", "").split(",");
-
-            for (var i = 0, len = arr.length; i < len; i++) {
-                arr[i] = parseFloat(trim(arr[i]));
-            }
-
-            var obj = { type: 'hsl', h: arr[0], s: arr[1], l: arr[2], a: 1 };
-
-            obj = Object.assign(obj, HSLtoRGB(obj));
-
-            return obj;
-        } else if (str.indexOf("hsla(") > -1) {
-            var arr = str.replace("hsla(", "").replace(")", "").split(",");
-
-            for (var i = 0, len = arr.length; i < len; i++) {
-
-                if (len - 1 == i) {
-                    arr[i] = parseFloat(trim(arr[i]));
-                } else {
-                    arr[i] = parseInt(trim(arr[i]), 10);
-                }
-            }
-
-            var obj = { type: 'hsl', h: arr[0], s: arr[1], l: arr[2], a: arr[3] };
-
-            obj = Object.assign(obj, HSLtoRGB(obj));
-
-            return obj;
-        } else if (str.indexOf("#") == 0) {
-
-            str = str.replace("#", "");
-
-            var arr = [];
-            if (str.length == 3) {
-                for (var i = 0, len = str.length; i < len; i++) {
-                    var char = str.substr(i, 1);
-                    arr.push(parseInt(char + char, 16));
-                }
-            } else {
-                for (var i = 0, len = str.length; i < len; i += 2) {
-                    arr.push(parseInt(str.substr(i, 2), 16));
-                }
-            }
-
-            var obj = { type: 'hex', r: arr[0], g: arr[1], b: arr[2], a: 1 };
-
-            obj = Object.assign(obj, RGBtoHSL(obj));
-
-            return obj;
-        }
-    } else if (typeof str == 'number') {
-        if (0x000000 <= str && str <= 0xffffff) {
-            var r = (str & 0xff0000) >> 16;
-            var g = (str & 0x00ff00) >> 8;
-            var b = (str & 0x0000ff) >> 0;
-
-            var obj = { type: 'hex', r: r, g: g, b: b, a: 1 };
-            obj = Object.assign(obj, RGBtoHSL(obj));
-            return obj;
-        } else if (0x00000000 <= str && str <= 0xffffffff) {
-            var _r = (str & 0xff000000) >> 24;
-            var _g = (str & 0x00ff0000) >> 16;
-            var _b = (str & 0x0000ff00) >> 8;
-            var a = (str & 0x000000ff) / 255;
-
-            var obj = { type: 'hex', r: _r, g: _g, b: _b, a: a };
-            obj = Object.assign(obj, RGBtoHSL(obj));
-
-            return obj;
-        }
+  if (typeof str == "string") {
+    if (ColorNames.isColorName(str)) {
+      str = ColorNames.getColorByName(str);
     }
 
-    return str;
+    if (str.indexOf("rgb(") > -1) {
+      var arr = str.replace("rgb(", "").replace(")", "").split(",");
+
+      for (var i = 0, len = arr.length; i < len; i++) {
+        arr[i] = parseInt(trim(arr[i]), 10);
+      }
+
+      var obj = { type: "rgb", r: arr[0], g: arr[1], b: arr[2], a: 1 };
+
+      obj = Object.assign(obj, RGBtoHSL(obj));
+
+      return obj;
+    } else if (str.indexOf("rgba(") > -1) {
+      var arr = str.replace("rgba(", "").replace(")", "").split(",");
+
+      for (var i = 0, len = arr.length; i < len; i++) {
+        if (len - 1 == i) {
+          arr[i] = parseFloat(trim(arr[i]));
+        } else {
+          arr[i] = parseInt(trim(arr[i]), 10);
+        }
+      }
+
+      var obj = { type: "rgb", r: arr[0], g: arr[1], b: arr[2], a: arr[3] };
+
+      obj = Object.assign(obj, RGBtoHSL(obj));
+
+      return obj;
+    } else if (str.indexOf("hsl(") > -1) {
+      var arr = str.replace("hsl(", "").replace(")", "").split(",");
+
+      for (var i = 0, len = arr.length; i < len; i++) {
+        arr[i] = parseFloat(trim(arr[i]));
+      }
+
+      var obj = { type: "hsl", h: arr[0], s: arr[1], l: arr[2], a: 1 };
+
+      obj = Object.assign(obj, HSLtoRGB(obj));
+
+      return obj;
+    } else if (str.indexOf("hsla(") > -1) {
+      var arr = str.replace("hsla(", "").replace(")", "").split(",");
+
+      for (var i = 0, len = arr.length; i < len; i++) {
+        if (len - 1 == i) {
+          arr[i] = parseFloat(trim(arr[i]));
+        } else {
+          arr[i] = parseInt(trim(arr[i]), 10);
+        }
+      }
+
+      var obj = { type: "hsl", h: arr[0], s: arr[1], l: arr[2], a: arr[3] };
+
+      obj = Object.assign(obj, HSLtoRGB(obj));
+
+      return obj;
+    } else if (str.indexOf("#") == 0) {
+      str = str.replace("#", "");
+
+      var arr = [];
+      if (str.length == 3) {
+        for (var i = 0, len = str.length; i < len; i++) {
+          var char = str.substr(i, 1);
+          arr.push(parseInt(char + char, 16));
+        }
+      } else {
+        for (var i = 0, len = str.length; i < len; i += 2) {
+          arr.push(parseInt(str.substr(i, 2), 16));
+        }
+      }
+
+      var obj = {};
+      if (str.length > 3 && arr.length == 4) {
+        var alphaDec = (arr[3] & 0x000000ff) / 255;
+        alphaDec = parseFloat(alphaDec.toFixed(2));
+        obj = { type: "hex", r: arr[0], g: arr[1], b: arr[2], a: alphaDec };
+      } else obj = { type: "hex", r: arr[0], g: arr[1], b: arr[2], a: 1 };
+
+      obj = Object.assign(obj, RGBtoHSL(obj));
+
+      return obj;
+    }
+  } else if (typeof str == "number") {
+    if (0x000000 <= str && str <= 0xffffff) {
+      var r = (str & 0xff0000) >> 16;
+      var g = (str & 0x00ff00) >> 8;
+      var b = (str & 0x0000ff) >> 0;
+
+      var obj = { type: "hex", r: r, g: g, b: b, a: 1 };
+      obj = Object.assign(obj, RGBtoHSL(obj));
+      return obj;
+    } else if (0x00000000 <= str && str <= 0xffffffff) {
+      var _r = (str & 0xff000000) >> 24;
+      var _g = (str & 0x00ff0000) >> 16;
+      var _b = (str & 0x0000ff00) >> 8;
+      var a = (str & 0x000000ff) / 255;
+
+      var obj = { type: "hex", r: _r, g: _g, b: _b, a: a };
+      obj = Object.assign(obj, RGBtoHSL(obj));
+
+      return obj;
+    }
+  }
+
+  return str;
 }
 
 function parseGradient(colors) {
-    if (typeof colors == 'string') {
-        colors = convertMatchesArray(colors);
-    }
+  if (typeof colors == "string") {
+    colors = convertMatchesArray(colors);
+  }
 
-    colors = colors.map(function (it) {
-        if (typeof it == 'string') {
-            var ret = convertMatches(it);
-            var arr = trim(ret.str).split(' ');
+  colors = colors.map(function (it) {
+    if (typeof it == "string") {
+      var ret = convertMatches(it);
+      var arr = trim(ret.str).split(" ");
 
-            if (arr[1]) {
-                if (arr[1].includes('%')) {
-                    arr[1] = parseFloat(arr[1].replace(/%/, '')) / 100;
-                } else {
-                    arr[1] = parseFloat(arr[1]);
-                }
-            } else {
-                arr[1] = '*';
-            }
-
-            arr[0] = reverseMatches(arr[0], ret.matches);
-
-            return arr;
-        } else if (Array.isArray(it)) {
-
-            if (!it[1]) {
-                it[1] = '*';
-            } else if (typeof it[1] == 'string') {
-                if (it[1].includes('%')) {
-                    it[1] = parseFloat(it[1].replace(/%/, '')) / 100;
-                } else {
-                    it[1] = +it[1];
-                }
-            }
-
-            return [].concat(toConsumableArray(it));
+      if (arr[1]) {
+        if (arr[1].includes("%")) {
+          arr[1] = parseFloat(arr[1].replace(/%/, "")) / 100;
+        } else {
+          arr[1] = parseFloat(arr[1]);
         }
-    });
+      } else {
+        arr[1] = "*";
+      }
 
-    var count = colors.filter(function (it) {
-        return it[1] === '*';
-    }).length;
+      arr[0] = reverseMatches(arr[0], ret.matches);
 
-    if (count > 0) {
-        var sum = colors.filter(function (it) {
-            return it[1] != '*' && it[1] != 1;
-        }).map(function (it) {
-            return it[1];
-        }).reduce(function (total, cur) {
-            return total + cur;
-        }, 0);
+      return arr;
+    } else if (Array.isArray(it)) {
+      if (!it[1]) {
+        it[1] = "*";
+      } else if (typeof it[1] == "string") {
+        if (it[1].includes("%")) {
+          it[1] = parseFloat(it[1].replace(/%/, "")) / 100;
+        } else {
+          it[1] = +it[1];
+        }
+      }
 
-        var dist = (1 - sum) / count;
-        colors.forEach(function (it, index) {
-            if (it[1] == '*' && index > 0) {
-                if (colors.length - 1 == index) {
-                    // it[1] = 1 
-                } else {
-                    it[1] = dist;
-                }
-            }
-        });
+      return [].concat(toConsumableArray(it));
     }
+  });
 
-    return colors;
+  var count = colors.filter(function (it) {
+    return it[1] === "*";
+  }).length;
+
+  if (count > 0) {
+    var sum = colors.filter(function (it) {
+      return it[1] != "*" && it[1] != 1;
+    }).map(function (it) {
+      return it[1];
+    }).reduce(function (total, cur) {
+      return total + cur;
+    }, 0);
+
+    var dist = (1 - sum) / count;
+    colors.forEach(function (it, index) {
+      if (it[1] == "*" && index > 0) {
+        if (colors.length - 1 == index) {
+          // it[1] = 1
+        } else {
+          it[1] = dist;
+        }
+      }
+    });
+  }
+
+  return colors;
 }
 
 var parser = {
-    matches: matches,
-    convertMatches: convertMatches,
-    convertMatchesArray: convertMatchesArray,
-    reverseMatches: reverseMatches,
-    parse: parse,
-    parseGradient: parseGradient,
-    trim: trim,
-    color_regexp: color_regexp,
-    color_split: color_split
+  matches: matches,
+  convertMatches: convertMatches,
+  convertMatchesArray: convertMatchesArray,
+  reverseMatches: reverseMatches,
+  parse: parse,
+  parseGradient: parseGradient,
+  trim: trim,
+  color_regexp: color_regexp,
+  color_split: color_split
 };
 
+/**
+ * @deprecated 
+ * 
+ * instead of this,  use blend function 
+ *  
+ * @param {*} startColor 
+ * @param {*} endColor 
+ * @param {*} t 
+ */
 function interpolateRGB(startColor, endColor) {
     var t = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
     var exportFormat = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'hex';
@@ -1906,6 +1946,7 @@ function crop() {
     };
 }
 
+// Image manupulate 
 function resize(dstWidth, dstHeight) {
     return function (bitmap, done) {
         var c = Canvas.drawPixels(bitmap);
@@ -2131,6 +2172,9 @@ function bitonal(darkColor, lightColor) {
     });
 }
 
+/*
+ * @param {Number} amount  -100..100  ,  value < 0  is darken, value > 0 is brighten 
+ */
 function brightness$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -2158,6 +2202,10 @@ function brownie() {
     });
 }
 
+/**
+ * 
+ * @param {Number} amount from 0 to 100 
+ */
 function clip() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -2172,6 +2220,10 @@ function clip() {
     }, { $C: $C });
 }
 
+/**
+ * 
+ * @param {*} amount   min = -128, max = 128 
+ */
 function contrast$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -2196,6 +2248,10 @@ function gamma() {
     }, { $C: $C });
 }
 
+/**
+ * F.gradient('red', 'blue', 'yellow', 'white', 10)
+ * F.gradient('red, blue, yellow, white, 10')
+ */
 function gradient$1() {
     // 전체 매개변수 기준으로 파싱 
     // 색이 아닌 것 기준으로 scale 변수로 인식 
@@ -2267,6 +2323,9 @@ function grayscale(amount) {
     });
 }
 
+/*
+ * @param {Number} amount   0..360  
+ */
 function hue() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 360;
 
@@ -2350,6 +2409,10 @@ function matrix() {
     });
 }
 
+/**
+ * 
+ * @param {Number} amount 1..100
+ */
 function noise() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -2393,6 +2456,9 @@ function polaroid() {
     });
 }
 
+/*
+ * @param {Number} amount  -100..100 
+ */
 function saturation() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
 
@@ -2412,6 +2478,9 @@ function saturation() {
     });
 }
 
+/*
+ * @param {Number} amount  0..1 
+ */
 function sepia() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -2464,6 +2533,12 @@ function shift() {
     });
 }
 
+/**
+ * change the relative darkness of (a part of an image) by overexposure to light.
+ * @param {*} r 
+ * @param {*} g 
+ * @param {*} b 
+ */
 function solarize(redValue, greenValue, blueValue) {
     var $redValue = parseParamNumber(redValue);
     var $greenValue = parseParamNumber(greenValue);
@@ -2523,6 +2598,9 @@ function thresholdColor() {
     });
 }
 
+/*
+ * @param {Number} amount  0..100 
+ */
 function threshold() {
   var scale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 200;
   var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
@@ -2584,6 +2662,11 @@ function blur () {
     return convolution(createBlurMatrix(amount));
 }
 
+/*
+ * carve, mold, or stamp a design on (a surface) so that it stands out in relief.
+ * 
+ * @param {Number} amount   0.0 .. 4.0 
+ */
 function emboss() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
 
@@ -4157,6 +4240,11 @@ function normal () {
     return convolution$1([0, 0, 0, 0, 1, 0, 0, 0, 0]);
 }
 
+/*
+ * carve, mold, or stamp a design on (a surface) so that it stands out in relief.
+ * 
+ * @param {Number} amount   0.0 .. 4.0 
+ */
 function emboss$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
 
@@ -4164,6 +4252,10 @@ function emboss$1() {
     return convolution$1([amount * -2.0, -amount, 0.0, -amount, 1.0, amount, 0.0, amount, amount * 2.0]);
 }
 
+/**
+ * 
+ * @param {Number} amount 0..1
+ */
 function gaussianBlur$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4280,6 +4372,9 @@ function bitonal$1(darkColor, lightColor) {
     return shader('\n        if ((pixelColor.r + pixelColor.g + pixelColor.b) > ' + checkVlue + ') {\n            outColor = vec4(' + lightColorString + '.rgb, pixelColor.a);\n        } else {\n            outColor = vec4(' + darkColorString + '.rgb, pixelColor.a);\n        }\n    ');
 }
 
+/*
+ * @param {Number} amount  -1..1  ,  value < 0  is darken, value > 0 is brighten 
+ */
 function brightness$2() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4317,6 +4412,9 @@ function brownie$1() {
     return matrix$3(0.5997023498159715, 0.34553243048391263, -0.2708298674538042, 0, -0.037703249837783157, 0.8609577587992641, 0.15059552388459913, 0, 0.24113635128153335, -0.07441037908422492, 0.44972182064877153, 0, 0, 0, 0, 1);
 }
 
+/*
+ * @param {Number} amount 0..1
+ */
 function clip$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -4333,6 +4431,9 @@ function chaos() {
     return shader('\n        vec2 st = pixelColor.st;\n        st *= ' + C + ';\n        \n        vec2 ipos = floor(st);  // get the integer coords\n\n        vec3 color = vec3(random( ipos ));\n\n        outColor = vec4(color, pixelColor.a);\n    ');
 }
 
+/*
+ * @param {Number} amount  0..1
+ */
 function contrast$2() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4341,6 +4442,9 @@ function contrast$2() {
     return shader('\n        outColor = pixelColor * ' + C + ';\n    ');
 }
 
+/*
+ * @param {Number} amount  -1..1  ,  value < 0  is darken, value > 0 is brighten 
+ */
 function gamma$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4349,6 +4453,10 @@ function gamma$1() {
     return shader('\n        outColor = vec4(pow(pixelColor.r, ' + C + '), pow(pixelColor.g, ' + C + '), pow(pixelColor.b, ' + C + '), pixelColor.a );\n    ');
 }
 
+/**
+ * F.gradient('red', 'blue', 'yellow', 'white', 10)
+ * F.gradient('red, blue, yellow, white, 10')
+ */
 function gradient$2() {
     // 전체 매개변수 기준으로 파싱 
     // 색이 아닌 것 기준으로 scale 변수로 인식 
@@ -4396,6 +4504,10 @@ function gradient$2() {
     return shader('\n        float rate = (pixelColor.r * 0.2126 + pixelColor.g * 0.7152 + pixelColor.b * 0.0722); \n\n        ' + temp.join('\n') + '        \n    ');
 }
 
+/**
+ * 
+ * @param {Number} amount 0..1
+ */
 function grayscale$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4407,6 +4519,9 @@ function grayscale$1() {
 }
 
 //http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+/*
+ * @param {Number} amount  0..1  ,  (real value 0..360)
+ */
 function hue$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4428,6 +4543,10 @@ function kodachrome$1() {
     return matrix$3(1.1285582396593525, -0.3967382283601348, -0.03992559172921793, 0, -0.16404339962244616, 1.0835251566291304, -0.05498805115633132, 0, -0.16786010706155763, -0.5603416277695248, 1.6014850761964943, 0, 0, 0, 0, 1);
 }
 
+/**
+ * 
+ * @param {Number} amount 0..1
+ */
 function noise$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4438,6 +4557,10 @@ function noise$1() {
     return shader('\n        float rnd = ' + min + ' + random( pixelColor.st ) * (' + max + ' - ' + min + ');\n\n        outColor = vec4(pixelColor.rgb + rnd, 1.0);\n    ');
 }
 
+/**
+ * 
+ * @param {Number} amount 0..1
+ */
 function opacity$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4451,6 +4574,9 @@ function polaroid$1() {
     return matrix$3(1.438, -0.062, -0.062, 0, -0.122, 1.378, -0.122, 0, -0.016, -0.016, 1.483, 0, 0, 0, 0, 1);
 }
 
+/*
+ * @param {Number} amount  0..1 
+ */
 function saturation$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -4459,6 +4585,9 @@ function saturation$1() {
     return matrix$3(L, 0, 0, 0, 0, L, 0, 0, 0, 0, L, 0, 0, 0, 0, L);
 }
 
+/*
+ * @param {Number} amount  0..100 
+ */
 function sepia$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4506,6 +4635,9 @@ function thresholdColor$1() {
     return shader('\n        float c = ( (pixelColor.r * 0.2126 + pixelColor.g * 0.7152 + pixelColor.b * 0.0722) ) >= ' + scale + ' ? 1.0 : 0.0;\n\n        outColor = vec4(c, c, c, pixelColor.a);\n    ');
 }
 
+/*
+ * @param {Number} amount  0..100 
+ */
 function threshold$1() {
   var scale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 200;
   var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
@@ -4513,6 +4645,12 @@ function threshold$1() {
   return thresholdColor$1(scale, amount, false);
 }
 
+/**
+ * 
+ * @param {*} redTint  0..1
+ * @param {*} greenTint 0..1
+ * @param {*} blueTint 0..1
+ */
 function tint$1 () {
     var redTint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var greenTint = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -6617,128 +6755,123 @@ var UIElement = function (_EventMachin) {
 }(EventMachin);
 
 function isUndefined(v) {
-    return typeof v == 'undefined' || v == null;
+  return typeof v == "undefined" || v == null;
 }
 
 var ColorManager = function (_BaseModule) {
-    inherits(ColorManager, _BaseModule);
+  inherits(ColorManager, _BaseModule);
 
-    function ColorManager() {
-        classCallCheck(this, ColorManager);
-        return possibleConstructorReturn(this, (ColorManager.__proto__ || Object.getPrototypeOf(ColorManager)).apply(this, arguments));
+  function ColorManager() {
+    classCallCheck(this, ColorManager);
+    return possibleConstructorReturn(this, (ColorManager.__proto__ || Object.getPrototypeOf(ColorManager)).apply(this, arguments));
+  }
+
+  createClass(ColorManager, [{
+    key: "initialize",
+    value: function initialize() {
+      get(ColorManager.prototype.__proto__ || Object.getPrototypeOf(ColorManager.prototype), "initialize", this).call(this);
+
+      this.$store.rgb = {};
+      this.$store.hsl = {};
+      this.$store.hsv = {};
+      this.$store.alpha = 1;
+      this.$store.format = "hex";
+
+      // this.$store.dispatch('/changeColor');
     }
+  }, {
+    key: "/changeFormat",
+    value: function changeFormat($store, format) {
+      $store.format = format;
 
-    createClass(ColorManager, [{
-        key: 'initialize',
-        value: function initialize() {
-            get(ColorManager.prototype.__proto__ || Object.getPrototypeOf(ColorManager.prototype), 'initialize', this).call(this);
+      $store.emit("changeFormat");
+    }
+  }, {
+    key: "/initColor",
+    value: function initColor($store, colorObj, source) {
+      $store.dispatch("/changeColor", colorObj, source, true);
+      $store.emit("initColor");
+    }
+  }, {
+    key: "/changeColor",
+    value: function changeColor($store, colorObj, source, isNotEmit) {
+      colorObj = colorObj || "#FF0000";
 
-            this.$store.rgb = {};
-            this.$store.hsl = {};
-            this.$store.hsv = {};
-            this.$store.alpha = 1;
-            this.$store.format = 'hex';
+      if (typeof colorObj == "string") {
+        colorObj = Color$1.parse(colorObj);
+      }
 
-            // this.$store.dispatch('/changeColor');
-        }
-    }, {
-        key: '/changeFormat',
-        value: function changeFormat($store, format) {
-            $store.format = format;
+      colorObj.source = colorObj.source || source;
 
-            $store.emit('changeFormat');
-        }
-    }, {
-        key: '/initColor',
-        value: function initColor($store, colorObj, source) {
-            $store.dispatch('/changeColor', colorObj, source, true);
-            $store.emit('initColor');
-        }
-    }, {
-        key: '/changeColor',
-        value: function changeColor($store, colorObj, source, isNotEmit) {
+      $store.alpha = isUndefined(colorObj.a) ? $store.alpha : colorObj.a;
+      $store.format = colorObj.type != "hsv" ? colorObj.type || $store.format : $store.format;
 
-            colorObj = colorObj || '#FF0000';
+      if (colorObj.type == "hsl") {
+        $store.hsl = Object.assign($store.hsl, colorObj);
+        $store.rgb = Color$1.HSLtoRGB($store.hsl);
+        $store.hsv = Color$1.HSLtoHSV(colorObj);
+      } else if (colorObj.type == "hex") {
+        $store.rgb = Object.assign($store.rgb, colorObj);
+        $store.hsl = Color$1.RGBtoHSL($store.rgb);
+        $store.hsv = Color$1.RGBtoHSV(colorObj);
+      } else if (colorObj.type == "rgb") {
+        $store.rgb = Object.assign($store.rgb, colorObj);
+        $store.hsl = Color$1.RGBtoHSL($store.rgb);
+        $store.hsv = Color$1.RGBtoHSV(colorObj);
+      } else if (colorObj.type == "hsv") {
+        $store.hsv = Object.assign($store.hsv, colorObj);
+        $store.rgb = Color$1.HSVtoRGB($store.hsv);
+        $store.hsl = Color$1.HSVtoHSL($store.hsv);
+      }
 
-            if (typeof colorObj == 'string') {
-                colorObj = Color$1.parse(colorObj);
-            }
+      if (!isNotEmit) {
+        $store.emit("changeColor", colorObj.source);
+      }
+    }
+  }, {
+    key: "/getHueColor",
+    value: function getHueColor($store) {
+      return HueColor.checkHueColor($store.hsv.h / 360);
+    }
+  }, {
+    key: "/toString",
+    value: function toString($store, type) {
+      type = type || $store.format;
+      var colorObj = $store[type] || $store.rgb;
+      return Color$1.format(Object.assign({}, colorObj, { a: $store.alpha }), type);
+    }
+  }, {
+    key: "/toColor",
+    value: function toColor($store, type) {
+      type = type || $store.format;
 
-            colorObj.source = colorObj.source || source;
+      if (type == "rgb") {
+        return $store.dispatch("/toRGB");
+      } else if (type == "hsl") {
+        return $store.dispatch("/toHSL");
+      } else if (type == "hex") {
+        return $store.dispatch("/toHEX");
+      }
 
-            $store.alpha = isUndefined(colorObj.a) ? $store.alpha : colorObj.a;
-            $store.format = colorObj.type != 'hsv' ? colorObj.type || $store.format : $store.format;
-
-            if ($store.format == 'hex' && $store.alpha < 1) {
-                $store.format = 'rgb';
-            }
-
-            if (colorObj.type == 'hsl') {
-                $store.hsl = Object.assign($store.hsl, colorObj);
-                $store.rgb = Color$1.HSLtoRGB($store.hsl);
-                $store.hsv = Color$1.HSLtoHSV(colorObj);
-            } else if (colorObj.type == 'hex') {
-                $store.rgb = Object.assign($store.rgb, colorObj);
-                $store.hsl = Color$1.RGBtoHSL($store.rgb);
-                $store.hsv = Color$1.RGBtoHSV(colorObj);
-            } else if (colorObj.type == 'rgb') {
-                $store.rgb = Object.assign($store.rgb, colorObj);
-                $store.hsl = Color$1.RGBtoHSL($store.rgb);
-                $store.hsv = Color$1.RGBtoHSV(colorObj);
-            } else if (colorObj.type == 'hsv') {
-                $store.hsv = Object.assign($store.hsv, colorObj);
-                $store.rgb = Color$1.HSVtoRGB($store.hsv);
-                $store.hsl = Color$1.HSVtoHSL($store.hsv);
-            }
-
-            if (!isNotEmit) {
-                $store.emit('changeColor', colorObj.source);
-            }
-        }
-    }, {
-        key: '/getHueColor',
-        value: function getHueColor($store) {
-            return HueColor.checkHueColor($store.hsv.h / 360);
-        }
-    }, {
-        key: '/toString',
-        value: function toString($store, type) {
-            type = type || $store.format;
-            var colorObj = $store[type] || $store.rgb;
-            return Color$1.format(Object.assign({}, colorObj, { a: $store.alpha }), type);
-        }
-    }, {
-        key: '/toColor',
-        value: function toColor($store, type) {
-            type = type || $store.format;
-
-            if (type == 'rgb') {
-                return $store.dispatch('/toRGB');
-            } else if (type == 'hsl') {
-                return $store.dispatch('/toHSL');
-            } else if (type == 'hex') {
-                return $store.dispatch('/toHEX');
-            }
-
-            return $store.dispatch('/toString', type);
-        }
-    }, {
-        key: '/toRGB',
-        value: function toRGB($store) {
-            return $store.dispatch('/toString', 'rgb');
-        }
-    }, {
-        key: '/toHSL',
-        value: function toHSL($store) {
-            return $store.dispatch('/toString', 'hsl');
-        }
-    }, {
-        key: '/toHEX',
-        value: function toHEX($store) {
-            return $store.dispatch('/toString', 'hex').toUpperCase();
-        }
-    }]);
-    return ColorManager;
+      return $store.dispatch("/toString", type);
+    }
+  }, {
+    key: "/toRGB",
+    value: function toRGB($store) {
+      return $store.dispatch("/toString", "rgb");
+    }
+  }, {
+    key: "/toHSL",
+    value: function toHSL($store) {
+      return $store.dispatch("/toString", "hsl");
+    }
+  }, {
+    key: "/toHEX",
+    value: function toHEX($store) {
+      return $store.dispatch("/toString", "hex").toUpperCase();
+    }
+  }]);
+  return ColorManager;
 }(BaseModule);
 
 var BaseStore = function () {
@@ -6828,424 +6961,419 @@ var BaseStore = function () {
 }();
 
 var BaseColorPicker = function (_UIElement) {
-    inherits(BaseColorPicker, _UIElement);
+  inherits(BaseColorPicker, _UIElement);
 
-    function BaseColorPicker(opt) {
-        classCallCheck(this, BaseColorPicker);
+  function BaseColorPicker(opt) {
+    classCallCheck(this, BaseColorPicker);
 
-        var _this = possibleConstructorReturn(this, (BaseColorPicker.__proto__ || Object.getPrototypeOf(BaseColorPicker)).call(this, opt));
+    var _this = possibleConstructorReturn(this, (BaseColorPicker.__proto__ || Object.getPrototypeOf(BaseColorPicker)).call(this, opt));
 
-        _this.isColorPickerShow = false;
-        _this.isShortCut = false;
-        _this.hideDelay = +(typeof _this.opt.hideDeplay == 'undefined' ? 2000 : _this.opt.hideDelay);
-        _this.timerCloseColorPicker;
-        _this.autoHide = _this.opt.autoHide || true;
-        _this.outputFormat = _this.opt.outputFormat;
-        _this.$checkColorPickerClass = _this.checkColorPickerClass.bind(_this);
+    _this.isColorPickerShow = false;
+    _this.isShortCut = false;
+    _this.hideDelay = +(typeof _this.opt.hideDeplay == 'undefined' ? 2000 : _this.opt.hideDelay);
+    _this.timerCloseColorPicker;
+    _this.autoHide = _this.opt.autoHide || true;
+    _this.outputFormat = _this.opt.outputFormat;
+    _this.$checkColorPickerClass = _this.checkColorPickerClass.bind(_this);
+    return _this;
+  }
 
-        return _this;
+  createClass(BaseColorPicker, [{
+    key: 'initialize',
+    value: function initialize() {
+      var _this2 = this;
+
+      this.$body = null;
+      this.$root = null;
+
+      this.$store = new BaseStore({
+        modules: [ColorManager, ColorSetsList]
+      });
+
+      this.callbackChange = function () {
+        _this2.callbackColorValue();
+      };
+
+      this.colorpickerShowCallback = function () {};
+      this.colorpickerHideCallback = function () {};
+
+      this.$body = new Dom(this.getContainer());
+      this.$root = new Dom('div', 'codemirror-colorpicker');
+
+      //  append colorpicker to container (ex : body)
+      if (this.opt.position == 'inline') {
+        this.$body.append(this.$root);
+      }
+
+      if (this.opt.type) {
+        // to change css style
+        this.$root.addClass(this.opt.type);
+      }
+
+      if (this.opt.hideInformation) {
+        this.$root.addClass('hide-information');
+      }
+
+      if (this.opt.hideColorsets) {
+        this.$root.addClass('hide-colorsets');
+      }
+
+      this.$arrow = new Dom('div', 'arrow');
+
+      this.$root.append(this.$arrow);
+
+      this.$store.dispatch('/setUserPalette', this.opt.colorSets);
+
+      this.render();
+
+      this.$root.append(this.$el);
+
+      this.initColorWithoutChangeEvent(this.opt.color);
+
+      // 이벤트 연결
+      this.initializeEvent();
+    }
+  }, {
+    key: 'initColorWithoutChangeEvent',
+    value: function initColorWithoutChangeEvent(color) {
+      this.$store.dispatch('/initColor', color);
     }
 
-    createClass(BaseColorPicker, [{
-        key: 'initialize',
-        value: function initialize() {
-            var _this2 = this;
+    /**
+     * public method
+     *
+     */
 
-            this.$body = null;
-            this.$root = null;
+    /**
+     *
+     * show colorpicker with position
+     *
+     * @param {{left, top, hideDelay, isShortCut}} opt
+     * @param {String|Object} color
+     * @param {Function} showCallback  it is called when colorpicker is shown
+     * @param {Function} hideCallback  it is called once when colorpicker is hidden
+     */
 
-            this.$store = new BaseStore({
-                modules: [ColorManager, ColorSetsList]
-            });
+  }, {
+    key: 'show',
+    value: function show(opt, color, showCallback, hideCallback) {
+      // 매번 이벤트를 지우고 다시 생성할 필요가 없어서 초기화 코드는 지움.
+      // this.destroy();
+      // this.initializeEvent();
+      // define colorpicker callback
+      this.colorpickerShowCallback = showCallback;
+      this.colorpickerHideCallback = hideCallback;
+      this.$root.css(this.getInitalizePosition()).show();
 
-            this.callbackChange = function () {
-                _this2.callbackColorValue();
-            };
+      this.isColorPickerShow = true;
+      this.isShortCut = opt.isShortCut || false;
+      this.outputFormat = opt.outputFormat;
 
-            this.colorpickerShowCallback = function () {};
-            this.colorpickerHideCallback = function () {};
+      // define hide delay
+      this.hideDelay = +(typeof opt.hideDelay == 'undefined' ? 2000 : opt.hideDelay);
+      if (this.hideDelay > 0) {
+        this.setHideDelay(this.hideDelay);
+      }
 
-            this.$body = new Dom(this.getContainer());
-            this.$root = new Dom('div', 'codemirror-colorpicker');
+      this.$root.appendTo(this.$body);
+      this.definePosition(opt);
+      this.initColorWithoutChangeEvent(color);
+    }
 
-            //  append colorpicker to container (ex : body)
-            if (this.opt.position == 'inline') {
-                this.$body.append(this.$root);
-            }
+    /**
+     *
+     * initialize color for colorpicker
+     *
+     * @param {String|Object} newColor
+     * @param {String} format  hex, rgb, hsl
+     */
 
-            if (this.opt.type) {
-                // to change css style
-                this.$root.addClass(this.opt.type);
-            }
+  }, {
+    key: 'initColor',
+    value: function initColor(newColor, format) {
+      this.$store.dispatch('/changeColor', newColor, format);
+    }
 
-            if (this.opt.hideInformation) {
-                this.$root.addClass('hide-information');
-            }
+    /**
+     * hide colorpicker
+     *
+     */
 
-            if (this.opt.hideColorsets) {
-                this.$root.addClass('hide-colorsets');
-            }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      if (this.isColorPickerShow) {
+        // this.destroy();
+        this.$root.hide();
+        this.$root.remove(); // not empty
+        this.isColorPickerShow = false;
 
-            this.$arrow = new Dom('div', 'arrow');
+        this.callbackHideColorValue();
+      }
+    }
 
-            this.$root.append(this.$arrow);
+    /**
+     * set to colors in current sets that you see
+     * @param {Array} colors
+     */
 
-            this.$store.dispatch('/setUserPalette', this.opt.colorSets);
+  }, {
+    key: 'setColorsInPalette',
+    value: function setColorsInPalette() {
+      var colors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
-            this.render();
+      this.$store.dispatch('/setCurrentColorAll', colors);
+    }
 
-            this.$root.append(this.$el);
+    /**
+     * refresh all color palette
+     *
+     * @param {*} list
+     */
 
-            this.initColorWithoutChangeEvent(this.opt.color);
+  }, {
+    key: 'setUserPalette',
+    value: function setUserPalette() {
+      var list = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
-            // 이벤트 연결 
-            this.initializeEvent();
+      this.$store.dispatch('/setUserPalette', list);
+    }
+
+    /**
+     * private method
+     */
+
+  }, {
+    key: 'getOption',
+    value: function getOption(key) {
+      return this.opt[key];
+    }
+  }, {
+    key: 'setOption',
+    value: function setOption(key, value) {
+      this.opt[key] = value;
+    }
+  }, {
+    key: 'isType',
+    value: function isType(key) {
+      return this.getOption('type') == key;
+    }
+  }, {
+    key: 'isPaletteType',
+    value: function isPaletteType() {
+      return this.isType('palette');
+    }
+  }, {
+    key: 'isSketchType',
+    value: function isSketchType() {
+      return this.isType('sketch');
+    }
+  }, {
+    key: 'getContainer',
+    value: function getContainer() {
+      return this.opt.container || document.body;
+    }
+  }, {
+    key: 'getColor',
+    value: function getColor(type) {
+      return this.$store.dispatch('/toColor', type);
+    }
+  }, {
+    key: 'definePositionForArrow',
+    value: function definePositionForArrow(opt, elementScreenLeft, elementScreenTop) {
+      // console.log(arguments)
+    }
+  }, {
+    key: 'definePosition',
+    value: function definePosition(opt) {
+      var width = this.$root.width();
+      var height = this.$root.height();
+
+      // set left position for color picker
+      var elementScreenLeft = opt.left - this.$body.scrollLeft();
+      if (width + elementScreenLeft > window.innerWidth) {
+        elementScreenLeft -= width + elementScreenLeft - window.innerWidth;
+      }
+      if (elementScreenLeft < 0) {
+        elementScreenLeft = 0;
+      }
+
+      // set top position for color picker
+      var elementScreenTop = opt.top - this.$body.scrollTop();
+      if (height + elementScreenTop > window.innerHeight) {
+        elementScreenTop -= height + elementScreenTop - window.innerHeight;
+      }
+      if (elementScreenTop < 0) {
+        elementScreenTop = 0;
+      }
+
+      // set position
+      this.$root.css({
+        left: elementScreenLeft + 'px',
+        top: elementScreenTop + 'px'
+      });
+
+      // this.definePositionForArrow(opt, elementScreenLeft, elementScreenTop);
+    }
+  }, {
+    key: 'getInitalizePosition',
+    value: function getInitalizePosition() {
+      if (this.opt.position == 'inline') {
+        return {
+          position: 'relative',
+          left: 'auto',
+          top: 'auto',
+          display: 'inline-block'
+        };
+      } else {
+        return {
+          position: 'fixed', // color picker has fixed position
+          left: '-10000px',
+          top: '-10000px'
+        };
+      }
+    }
+  }, {
+    key: 'isAbsolute',
+    value: function isAbsolute() {
+      return this.opt.position !== 'inline';
+    }
+
+    // Event Bindings
+
+  }, {
+    key: 'mouseup.isAbsolute document',
+    value: function mouseupIsAbsoluteDocument(e) {
+      this.__isMouseDown = false;
+      // when color picker clicked in outside
+      if (this.checkInHtml(e.target)) {
+        //this.setHideDelay(hideDelay);
+      } else if (this.checkColorPickerClass(e.target) == false) {
+        this.hide();
+      } else {
+        if (!this.__isMouseIn) {
+          clearTimeout(this.timerCloseColorPicker);
+          this.timerCloseColorPicker = setTimeout(this.hide.bind(this), this.delayTime || this.hideDelay);
         }
-    }, {
-        key: 'initColorWithoutChangeEvent',
-        value: function initColorWithoutChangeEvent(color) {
-            this.$store.dispatch('/initColor', color);
-        }
+      }
+    }
+  }, {
+    key: 'mouseover.isAbsolute $root',
+    value: function mouseoverIsAbsolute$root(e) {
+      clearTimeout(this.timerCloseColorPicker);
+      // this.__isMouseDown = true;
+    }
+  }, {
+    key: 'mousemove.isAbsolute $root',
+    value: function mousemoveIsAbsolute$root(e) {
+      clearTimeout(this.timerCloseColorPicker);
+    }
+  }, {
+    key: 'mouseenter.isAbsolute $root',
+    value: function mouseenterIsAbsolute$root(e) {
+      clearTimeout(this.timerCloseColorPicker);
+      this.__isMouseIn = true;
+    }
+  }, {
+    key: 'mouseleave.isAbsolute $root',
+    value: function mouseleaveIsAbsolute$root(e) {
+      this.__isMouseIn = false;
+      if (!this.__isMouseDown) {
+        clearTimeout(this.timerCloseColorPicker);
+        this.timerCloseColorPicker = setTimeout(this.hide.bind(this), this.delayTime || this.hideDelay);
+      }
+    }
+  }, {
+    key: 'mousedown.isAbsolute $root',
+    value: function mousedownIsAbsolute$root(e) {
+      this.__isMouseDown = true;
+    }
+  }, {
+    key: 'setHideDelay',
+    value: function setHideDelay(delayTime) {
+      this.delayTime = delayTime || 0;
+    }
+  }, {
+    key: 'runHideDelay',
+    value: function runHideDelay() {
+      if (this.isColorPickerShow) {
+        this.setHideDelay();
+        // const hideCallback = this.setHideDelay(delayTime);
 
-        /** 
-         * public method 
-         * 
-         */
+        // this.timerCloseColorPicker = setTimeout(hideCallback, delayTime);
+      }
+    }
+  }, {
+    key: 'callbackColorValue',
+    value: function callbackColorValue(color) {
+      color = color || this.getCurrentColor();
 
-        /**
-         * 
-         * show colorpicker with position  
-         * 
-         * @param {{left, top, hideDelay, isShortCut}} opt 
-         * @param {String|Object} color  
-         * @param {Function} showCallback  it is called when colorpicker is shown
-         * @param {Function} hideCallback  it is called once when colorpicker is hidden
-         */
+      if (typeof this.opt.onChange == 'function') {
+        this.opt.onChange.call(this, color);
+      }
 
-    }, {
-        key: 'show',
-        value: function show(opt, color, showCallback, hideCallback) {
+      if (typeof this.colorpickerShowCallback == 'function') {
+        this.colorpickerShowCallback(color);
+      }
+    }
+  }, {
+    key: 'callbackHideColorValue',
+    value: function callbackHideColorValue(color) {
+      color = color || this.getCurrentColor();
+      if (typeof this.opt.onHide == 'function') {
+        this.opt.onHide.call(this, color);
+      }
 
-            // 매번 이벤트를 지우고 다시 생성할 필요가 없어서 초기화 코드는 지움. 
-            // this.destroy();
-            // this.initializeEvent();
-            // define colorpicker callback
-            this.colorpickerShowCallback = showCallback;
-            this.colorpickerHideCallback = hideCallback;
-            this.$root.css(this.getInitalizePosition()).show();
+      if (typeof this.colorpickerHideCallback == 'function') {
+        this.colorpickerHideCallback(color);
+      }
+    }
+  }, {
+    key: 'getCurrentColor',
+    value: function getCurrentColor() {
+      return this.$store.dispatch('/toColor', this.outputFormat);
+    }
+  }, {
+    key: 'checkColorPickerClass',
+    value: function checkColorPickerClass(el) {
+      var hasColorView = new Dom(el).closest('codemirror-colorview');
+      var hasColorPicker = new Dom(el).closest('codemirror-colorpicker');
+      var hasCodeMirror = new Dom(el).closest('CodeMirror');
+      var IsInHtml = el.nodeName == 'HTML';
 
-            this.isColorPickerShow = true;
-            this.isShortCut = opt.isShortCut || false;
-            this.outputFormat = opt.outputFormat;
+      return !!(hasColorPicker || hasColorView || hasCodeMirror);
+    }
+  }, {
+    key: 'checkInHtml',
+    value: function checkInHtml(el) {
+      var IsInHtml = el.nodeName == 'HTML';
 
-            // define hide delay
-            this.hideDelay = +(typeof opt.hideDelay == 'undefined' ? 2000 : opt.hideDelay);
-            if (this.hideDelay > 0) {
-                this.setHideDelay(this.hideDelay);
-            }
+      return IsInHtml;
+    }
+  }, {
+    key: 'initializeStoreEvent',
+    value: function initializeStoreEvent() {
+      get(BaseColorPicker.prototype.__proto__ || Object.getPrototypeOf(BaseColorPicker.prototype), 'initializeStoreEvent', this).call(this);
 
-            this.$root.appendTo(this.$body);
-            this.definePosition(opt);
-            this.initColorWithoutChangeEvent(color);
-        }
+      this.$store.on('changeColor', this.callbackChange);
+      this.$store.on('changeFormat', this.callbackChange);
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      get(BaseColorPicker.prototype.__proto__ || Object.getPrototypeOf(BaseColorPicker.prototype), 'destroy', this).call(this);
 
-        /**
-         * 
-         * initialize color for colorpicker
-         * 
-         * @param {String|Object} newColor 
-         * @param {String} format  hex, rgb, hsl
-         */
+      this.$store.off('changeColor', this.callbackChange);
+      this.$store.off('changeFormat', this.callbackChange);
 
-    }, {
-        key: 'initColor',
-        value: function initColor(newColor, format) {
-            this.$store.dispatch('/changeColor', newColor, format);
-        }
+      this.callbackChange = undefined;
 
-        /**
-         * hide colorpicker 
-         * 
-         */
-
-    }, {
-        key: 'hide',
-        value: function hide() {
-            if (this.isColorPickerShow) {
-                // this.destroy();
-                this.$root.hide();
-                this.$root.remove(); // not empty 
-                this.isColorPickerShow = false;
-
-                this.callbackHideColorValue();
-            }
-        }
-
-        /**
-         * set to colors in current sets that you see 
-         * @param {Array} colors 
-         */
-
-    }, {
-        key: 'setColorsInPalette',
-        value: function setColorsInPalette() {
-            var colors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-            this.$store.dispatch('/setCurrentColorAll', colors);
-        }
-
-        /**
-         * refresh all color palette 
-         * 
-         * @param {*} list 
-         */
-
-    }, {
-        key: 'setUserPalette',
-        value: function setUserPalette() {
-            var list = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-            this.$store.dispatch('/setUserPalette', list);
-        }
-
-        /**
-         * private method 
-         */
-
-    }, {
-        key: 'getOption',
-        value: function getOption(key) {
-            return this.opt[key];
-        }
-    }, {
-        key: 'setOption',
-        value: function setOption(key, value) {
-            this.opt[key] = value;
-        }
-    }, {
-        key: 'isType',
-        value: function isType(key) {
-            return this.getOption('type') == key;
-        }
-    }, {
-        key: 'isPaletteType',
-        value: function isPaletteType() {
-            return this.isType('palette');
-        }
-    }, {
-        key: 'isSketchType',
-        value: function isSketchType() {
-            return this.isType('sketch');
-        }
-    }, {
-        key: 'getContainer',
-        value: function getContainer() {
-            return this.opt.container || document.body;
-        }
-    }, {
-        key: 'getColor',
-        value: function getColor(type) {
-            return this.$store.dispatch('/toColor', type);
-        }
-    }, {
-        key: 'definePositionForArrow',
-        value: function definePositionForArrow(opt, elementScreenLeft, elementScreenTop) {
-            // console.log(arguments)
-        }
-    }, {
-        key: 'definePosition',
-        value: function definePosition(opt) {
-
-            var width = this.$root.width();
-            var height = this.$root.height();
-
-            // set left position for color picker
-            var elementScreenLeft = opt.left - this.$body.scrollLeft();
-            if (width + elementScreenLeft > window.innerWidth) {
-                elementScreenLeft -= width + elementScreenLeft - window.innerWidth;
-            }
-            if (elementScreenLeft < 0) {
-                elementScreenLeft = 0;
-            }
-
-            // set top position for color picker
-            var elementScreenTop = opt.top - this.$body.scrollTop();
-            if (height + elementScreenTop > window.innerHeight) {
-                elementScreenTop -= height + elementScreenTop - window.innerHeight;
-            }
-            if (elementScreenTop < 0) {
-                elementScreenTop = 0;
-            }
-
-            // set position
-            this.$root.css({
-                left: elementScreenLeft + 'px',
-                top: elementScreenTop + 'px'
-            });
-
-            // this.definePositionForArrow(opt, elementScreenLeft, elementScreenTop);
-        }
-    }, {
-        key: 'getInitalizePosition',
-        value: function getInitalizePosition() {
-            if (this.opt.position == 'inline') {
-                return {
-                    position: 'relative',
-                    left: 'auto',
-                    top: 'auto',
-                    display: 'inline-block'
-                };
-            } else {
-                return {
-                    position: 'fixed', // color picker has fixed position
-                    left: '-10000px',
-                    top: '-10000px'
-                };
-            }
-        }
-    }, {
-        key: 'isAbsolute',
-        value: function isAbsolute() {
-            return this.opt.position !== 'inline';
-        }
-
-        // Event Bindings 
-
-    }, {
-        key: 'mouseup.isAbsolute document',
-        value: function mouseupIsAbsoluteDocument(e) {
-
-            this.__isMouseDown = false;
-            // when color picker clicked in outside
-            if (this.checkInHtml(e.target)) {
-                //this.setHideDelay(hideDelay);
-            } else if (this.checkColorPickerClass(e.target) == false) {
-                this.hide();
-            } else {
-                if (!this.__isMouseIn) {
-                    clearTimeout(this.timerCloseColorPicker);
-                    this.timerCloseColorPicker = setTimeout(this.hide.bind(this), this.delayTime || this.hideDelay);
-                }
-            }
-        }
-    }, {
-        key: 'mouseover.isAbsolute $root',
-        value: function mouseoverIsAbsolute$root(e) {
-            clearTimeout(this.timerCloseColorPicker);
-            // this.__isMouseDown = true; 
-        }
-    }, {
-        key: 'mousemove.isAbsolute $root',
-        value: function mousemoveIsAbsolute$root(e) {
-            clearTimeout(this.timerCloseColorPicker);
-        }
-    }, {
-        key: 'mouseenter.isAbsolute $root',
-        value: function mouseenterIsAbsolute$root(e) {
-            clearTimeout(this.timerCloseColorPicker);
-            this.__isMouseIn = true;
-        }
-    }, {
-        key: 'mouseleave.isAbsolute $root',
-        value: function mouseleaveIsAbsolute$root(e) {
-            this.__isMouseIn = false;
-            if (!this.__isMouseDown) {
-                clearTimeout(this.timerCloseColorPicker);
-                this.timerCloseColorPicker = setTimeout(this.hide.bind(this), this.delayTime || this.hideDelay);
-            }
-        }
-    }, {
-        key: 'mousedown.isAbsolute $root',
-        value: function mousedownIsAbsolute$root(e) {
-            this.__isMouseDown = true;
-        }
-    }, {
-        key: 'setHideDelay',
-        value: function setHideDelay(delayTime) {
-            this.delayTime = delayTime || 0;
-        }
-    }, {
-        key: 'runHideDelay',
-        value: function runHideDelay() {
-
-            if (this.isColorPickerShow) {
-                this.setHideDelay();
-                // const hideCallback = this.setHideDelay(delayTime);
-
-                // this.timerCloseColorPicker = setTimeout(hideCallback, delayTime);
-            }
-        }
-    }, {
-        key: 'callbackColorValue',
-        value: function callbackColorValue(color) {
-            color = color || this.getCurrentColor();
-
-            if (typeof this.opt.onChange == 'function') {
-                this.opt.onChange.call(this, color);
-            }
-
-            if (typeof this.colorpickerShowCallback == 'function') {
-                this.colorpickerShowCallback(color);
-            }
-        }
-    }, {
-        key: 'callbackHideColorValue',
-        value: function callbackHideColorValue(color) {
-            color = color || this.getCurrentColor();
-            if (typeof this.opt.onHide == 'function') {
-                this.opt.onHide.call(this, color);
-            }
-
-            if (typeof this.colorpickerHideCallback == 'function') {
-                this.colorpickerHideCallback(color);
-            }
-        }
-    }, {
-        key: 'getCurrentColor',
-        value: function getCurrentColor() {
-            return this.$store.dispatch('/toColor', this.outputFormat);
-        }
-    }, {
-        key: 'checkColorPickerClass',
-        value: function checkColorPickerClass(el) {
-            var hasColorView = new Dom(el).closest('codemirror-colorview');
-            var hasColorPicker = new Dom(el).closest('codemirror-colorpicker');
-            var hasCodeMirror = new Dom(el).closest('CodeMirror');
-            var IsInHtml = el.nodeName == 'HTML';
-
-            return !!(hasColorPicker || hasColorView || hasCodeMirror);
-        }
-    }, {
-        key: 'checkInHtml',
-        value: function checkInHtml(el) {
-            var IsInHtml = el.nodeName == 'HTML';
-
-            return IsInHtml;
-        }
-    }, {
-        key: 'initializeStoreEvent',
-        value: function initializeStoreEvent() {
-            get(BaseColorPicker.prototype.__proto__ || Object.getPrototypeOf(BaseColorPicker.prototype), 'initializeStoreEvent', this).call(this);
-
-            this.$store.on('changeColor', this.callbackChange);
-            this.$store.on('changeFormat', this.callbackChange);
-        }
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            get(BaseColorPicker.prototype.__proto__ || Object.getPrototypeOf(BaseColorPicker.prototype), 'destroy', this).call(this);
-
-            this.$store.off('changeColor', this.callbackChange);
-            this.$store.off('changeFormat', this.callbackChange);
-
-            this.callbackChange = undefined;
-
-            // remove color picker callback
-            this.colorpickerShowCallback = undefined;
-            this.colorpickerHideCallback = undefined;
-        }
-    }]);
-    return BaseColorPicker;
+      // remove color picker callback
+      this.colorpickerShowCallback = undefined;
+      this.colorpickerHideCallback = undefined;
+    }
+  }]);
+  return BaseColorPicker;
 }(UIElement);
 
 var BaseBox = function (_UIElement) {
@@ -7935,202 +8063,202 @@ var ColorWheel = function (_UIElement) {
 var source$2 = 'chromedevtool-information';
 
 var ColorInformation = function (_UIElement) {
-    inherits(ColorInformation, _UIElement);
+  inherits(ColorInformation, _UIElement);
 
-    function ColorInformation() {
-        classCallCheck(this, ColorInformation);
-        return possibleConstructorReturn(this, (ColorInformation.__proto__ || Object.getPrototypeOf(ColorInformation)).apply(this, arguments));
+  function ColorInformation() {
+    classCallCheck(this, ColorInformation);
+    return possibleConstructorReturn(this, (ColorInformation.__proto__ || Object.getPrototypeOf(ColorInformation)).apply(this, arguments));
+  }
+
+  createClass(ColorInformation, [{
+    key: 'template',
+    value: function template() {
+      return '\n        <div class="information hex">\n            <div ref="$informationChange" class="information-change">\n                <button ref="$formatChangeButton" type="button" class="format-change-button arrow-button"></button>\n            </div>\n            <div class="information-item hex">\n                <div class="input-field hex">\n                    <input ref="$hexCode" class="input" type="text" />\n                    <div class="title">HEX</div>\n                </div>\n            </div>\n            <div class="information-item rgb">\n                <div class="input-field rgb-r">\n                    <input ref="$rgb_r" class="input" type="number" step="1" min="0" max="255" />\n                    <div class="title">R</div>\n                </div>\n                <div class="input-field rgb-g">\n                    <input ref="$rgb_g" class="input" type="number" step="1" min="0" max="255" />\n                    <div class="title">G</div>\n                </div>\n                <div class="input-field rgb-b">\n                    <input ref="$rgb_b" class="input" type="number" step="1" min="0" max="255" />\n                    <div class="title">B</div>\n                </div>          \n                <div class="input-field rgb-a">\n                    <input ref="$rgb_a" class="input" type="number" step="0.01" min="0" max="1" />\n                    <div class="title">A</div>\n                </div>                                                            \n            </div>\n            <div class="information-item hsl">\n                <div class="input-field hsl-h">\n                    <input ref="$hsl_h" class="input" type="number" step="1" min="0" max="360" />\n                    <div class="title">H</div>\n                </div>\n                <div class="input-field hsl-s">\n                    <input ref="$hsl_s" class="input" type="number" step="1" min="0" max="100" />\n                    <div class="postfix">%</div>\n                    <div class="title">S</div>\n                </div>\n                <div class="input-field hsl-l">\n                    <input ref="$hsl_l" class="input" type="number" step="1" min="0" max="100" />\n                    <div class="postfix">%</div>                        \n                    <div class="title">L</div>\n                </div>\n                <div class="input-field hsl-a">\n                    <input ref="$hsl_a" class="input" type="number" step="0.01" min="0" max="1" />\n                    <div class="title">A</div>\n                </div>\n            </div>\n        </div>\n        ';
     }
+  }, {
+    key: 'setCurrentFormat',
+    value: function setCurrentFormat(format) {
+      this.format = format;
 
-    createClass(ColorInformation, [{
-        key: 'template',
-        value: function template() {
-            return '\n        <div class="information hex">\n            <div ref="$informationChange" class="information-change">\n                <button ref="$formatChangeButton" type="button" class="format-change-button arrow-button"></button>\n            </div>\n            <div class="information-item hex">\n                <div class="input-field hex">\n                    <input ref="$hexCode" class="input" type="text" />\n                    <div class="title">HEX</div>\n                </div>\n            </div>\n            <div class="information-item rgb">\n                <div class="input-field rgb-r">\n                    <input ref="$rgb_r" class="input" type="number" step="1" min="0" max="255" />\n                    <div class="title">R</div>\n                </div>\n                <div class="input-field rgb-g">\n                    <input ref="$rgb_g" class="input" type="number" step="1" min="0" max="255" />\n                    <div class="title">G</div>\n                </div>\n                <div class="input-field rgb-b">\n                    <input ref="$rgb_b" class="input" type="number" step="1" min="0" max="255" />\n                    <div class="title">B</div>\n                </div>          \n                <div class="input-field rgb-a">\n                    <input ref="$rgb_a" class="input" type="number" step="0.01" min="0" max="1" />\n                    <div class="title">A</div>\n                </div>                                                            \n            </div>\n            <div class="information-item hsl">\n                <div class="input-field hsl-h">\n                    <input ref="$hsl_h" class="input" type="number" step="1" min="0" max="360" />\n                    <div class="title">H</div>\n                </div>\n                <div class="input-field hsl-s">\n                    <input ref="$hsl_s" class="input" type="number" step="1" min="0" max="100" />\n                    <div class="postfix">%</div>\n                    <div class="title">S</div>\n                </div>\n                <div class="input-field hsl-l">\n                    <input ref="$hsl_l" class="input" type="number" step="1" min="0" max="100" />\n                    <div class="postfix">%</div>                        \n                    <div class="title">L</div>\n                </div>\n                <div class="input-field hsl-a">\n                    <input ref="$hsl_a" class="input" type="number" step="0.01" min="0" max="1" />\n                    <div class="title">A</div>\n                </div>\n            </div>\n        </div>\n        ';
-        }
-    }, {
-        key: 'setCurrentFormat',
-        value: function setCurrentFormat(format) {
-            this.format = format;
+      this.initFormat();
+    }
+  }, {
+    key: 'initFormat',
+    value: function initFormat() {
+      var current_format = this.format || 'hex';
 
-            this.initFormat();
-        }
-    }, {
-        key: 'initFormat',
-        value: function initFormat() {
-            var current_format = this.format || 'hex';
+      this.$el.removeClass('hex');
+      this.$el.removeClass('rgb');
+      this.$el.removeClass('hsl');
+      this.$el.addClass(current_format);
+    }
+  }, {
+    key: 'nextFormat',
+    value: function nextFormat() {
+      var current_format = this.format || 'hex';
 
-            this.$el.removeClass('hex');
-            this.$el.removeClass('rgb');
-            this.$el.removeClass('hsl');
-            this.$el.addClass(current_format);
-        }
-    }, {
-        key: 'nextFormat',
-        value: function nextFormat() {
-            var current_format = this.format || 'hex';
+      var next_format = 'hex';
+      if (current_format == 'hex') {
+        next_format = 'rgb';
+      } else if (current_format == 'rgb') {
+        next_format = 'hsl';
+      } else if (current_format == 'hsl') {
+        //if (this.$store.alpha == 1) {
+        next_format = 'hex';
+        //} else {
+        //  next_format = 'rgb'
+        //}
+      }
 
-            var next_format = 'hex';
-            if (current_format == 'hex') {
-                next_format = 'rgb';
-            } else if (current_format == 'rgb') {
-                next_format = 'hsl';
-            } else if (current_format == 'hsl') {
-                if (this.$store.alpha == 1) {
-                    next_format = 'hex';
-                } else {
-                    next_format = 'rgb';
-                }
-            }
+      this.$el.removeClass(current_format);
+      this.$el.addClass(next_format);
+      this.format = next_format;
 
-            this.$el.removeClass(current_format);
-            this.$el.addClass(next_format);
-            this.format = next_format;
+      this.$store.dispatch('/changeFormat', this.format);
+    }
+  }, {
+    key: 'getFormat',
+    value: function getFormat() {
+      return this.format || 'hex';
+    }
+  }, {
+    key: 'checkNumberKey',
+    value: function checkNumberKey(e) {
+      return Event.checkNumberKey(e);
+    }
+  }, {
+    key: 'checkNotNumberKey',
+    value: function checkNotNumberKey(e) {
+      return !Event.checkNumberKey(e);
+    }
+  }, {
+    key: 'changeRgbColor',
+    value: function changeRgbColor() {
+      this.$store.dispatch('/changeColor', {
+        type: 'rgb',
+        r: this.refs.$rgb_r.int(),
+        g: this.refs.$rgb_g.int(),
+        b: this.refs.$rgb_b.int(),
+        a: this.refs.$rgb_a.float(),
+        source: source$2
+      });
+    }
+  }, {
+    key: 'changeHslColor',
+    value: function changeHslColor() {
+      this.$store.dispatch('/changeColor', {
+        type: 'hsl',
+        h: this.refs.$hsl_h.int(),
+        s: this.refs.$hsl_s.int(),
+        l: this.refs.$hsl_l.int(),
+        a: this.refs.$hsl_a.float(),
+        source: source$2
+      });
+    }
+  }, {
+    key: '@changeColor',
+    value: function changeColor(sourceType) {
+      if (source$2 != sourceType) {
+        this.refresh();
+      }
+    }
+  }, {
+    key: '@initColor',
+    value: function initColor() {
+      this.refresh();
+    }
+  }, {
+    key: 'input $rgb_r',
+    value: function input$rgb_r(e) {
+      this.changeRgbColor();
+    }
+  }, {
+    key: 'input $rgb_g',
+    value: function input$rgb_g(e) {
+      this.changeRgbColor();
+    }
+  }, {
+    key: 'input $rgb_b',
+    value: function input$rgb_b(e) {
+      this.changeRgbColor();
+    }
+  }, {
+    key: 'input $rgb_a',
+    value: function input$rgb_a(e) {
+      this.changeRgbColor();
+    }
+  }, {
+    key: 'input $hsl_h',
+    value: function input$hsl_h(e) {
+      this.changeHslColor();
+    }
+  }, {
+    key: 'input $hsl_s',
+    value: function input$hsl_s(e) {
+      this.changeHslColor();
+    }
+  }, {
+    key: 'input $hsl_l',
+    value: function input$hsl_l(e) {
+      this.changeHslColor();
+    }
+  }, {
+    key: 'input $hsl_a',
+    value: function input$hsl_a(e) {
+      this.changeHslColor();
+    }
+  }, {
+    key: 'keydown $hexCode',
+    value: function keydown$hexCode(e) {
+      if (e.which < 65 || e.which > 70) {
+        return this.checkNumberKey(e);
+      }
+    }
+  }, {
+    key: 'keyup $hexCode',
+    value: function keyup$hexCode(e) {
+      var code = this.refs.$hexCode.val();
 
-            this.$store.dispatch('/changeFormat', this.format);
-        }
-    }, {
-        key: 'getFormat',
-        value: function getFormat() {
-            return this.format || 'hex';
-        }
-    }, {
-        key: 'checkNumberKey',
-        value: function checkNumberKey(e) {
-            return Event.checkNumberKey(e);
-        }
-    }, {
-        key: 'checkNotNumberKey',
-        value: function checkNotNumberKey(e) {
-            return !Event.checkNumberKey(e);
-        }
-    }, {
-        key: 'changeRgbColor',
-        value: function changeRgbColor() {
-            this.$store.dispatch('/changeColor', {
-                type: 'rgb',
-                r: this.refs.$rgb_r.int(),
-                g: this.refs.$rgb_g.int(),
-                b: this.refs.$rgb_b.int(),
-                a: this.refs.$rgb_a.float(),
-                source: source$2
-            });
-        }
-    }, {
-        key: 'changeHslColor',
-        value: function changeHslColor() {
-            this.$store.dispatch('/changeColor', {
-                type: 'hsl',
-                h: this.refs.$hsl_h.int(),
-                s: this.refs.$hsl_s.int(),
-                l: this.refs.$hsl_l.int(),
-                a: this.refs.$hsl_a.float(),
-                source: source$2
-            });
-        }
-    }, {
-        key: '@changeColor',
-        value: function changeColor(sourceType) {
-            if (source$2 != sourceType) {
-                this.refresh();
-            }
-        }
-    }, {
-        key: '@initColor',
-        value: function initColor() {
-            this.refresh();
-        }
-    }, {
-        key: 'input $rgb_r',
-        value: function input$rgb_r(e) {
-            this.changeRgbColor();
-        }
-    }, {
-        key: 'input $rgb_g',
-        value: function input$rgb_g(e) {
-            this.changeRgbColor();
-        }
-    }, {
-        key: 'input $rgb_b',
-        value: function input$rgb_b(e) {
-            this.changeRgbColor();
-        }
-    }, {
-        key: 'input $rgb_a',
-        value: function input$rgb_a(e) {
-            this.changeRgbColor();
-        }
-    }, {
-        key: 'input $hsl_h',
-        value: function input$hsl_h(e) {
-            this.changeHslColor();
-        }
-    }, {
-        key: 'input $hsl_s',
-        value: function input$hsl_s(e) {
-            this.changeHslColor();
-        }
-    }, {
-        key: 'input $hsl_l',
-        value: function input$hsl_l(e) {
-            this.changeHslColor();
-        }
-    }, {
-        key: 'input $hsl_a',
-        value: function input$hsl_a(e) {
-            this.changeHslColor();
-        }
-    }, {
-        key: 'keydown $hexCode',
-        value: function keydown$hexCode(e) {
-            if (e.which < 65 || e.which > 70) {
-                return this.checkNumberKey(e);
-            }
-        }
-    }, {
-        key: 'keyup $hexCode',
-        value: function keyup$hexCode(e) {
-            var code = this.refs.$hexCode.val();
-
-            if (code.charAt(0) == '#' && code.length == 7) {
-                this.$store.dispatch('/changeColor', code, source$2);
-            }
-        }
-    }, {
-        key: 'click $formatChangeButton',
-        value: function click$formatChangeButton(e) {
-            this.nextFormat();
-        }
-    }, {
-        key: 'setRGBInput',
-        value: function setRGBInput() {
-            this.refs.$rgb_r.val(this.$store.rgb.r);
-            this.refs.$rgb_g.val(this.$store.rgb.g);
-            this.refs.$rgb_b.val(this.$store.rgb.b);
-            this.refs.$rgb_a.val(this.$store.alpha);
-        }
-    }, {
-        key: 'setHSLInput',
-        value: function setHSLInput() {
-            this.refs.$hsl_h.val(this.$store.hsl.h);
-            this.refs.$hsl_s.val(this.$store.hsl.s);
-            this.refs.$hsl_l.val(this.$store.hsl.l);
-            this.refs.$hsl_a.val(this.$store.alpha);
-        }
-    }, {
-        key: 'setHexInput',
-        value: function setHexInput() {
-            this.refs.$hexCode.val(this.$store.dispatch('/toHEX'));
-        }
-    }, {
-        key: 'refresh',
-        value: function refresh() {
-            this.setCurrentFormat(this.$store.format);
-            this.setRGBInput();
-            this.setHSLInput();
-            this.setHexInput();
-        }
-    }]);
-    return ColorInformation;
+      if (code.charAt(0) == '#' && (code.length == 7 || code.length == 9)) {
+        this.$store.dispatch('/changeColor', code, source$2);
+      }
+    }
+  }, {
+    key: 'click $formatChangeButton',
+    value: function click$formatChangeButton(e) {
+      this.nextFormat();
+    }
+  }, {
+    key: 'setRGBInput',
+    value: function setRGBInput() {
+      this.refs.$rgb_r.val(this.$store.rgb.r);
+      this.refs.$rgb_g.val(this.$store.rgb.g);
+      this.refs.$rgb_b.val(this.$store.rgb.b);
+      this.refs.$rgb_a.val(this.$store.alpha);
+    }
+  }, {
+    key: 'setHSLInput',
+    value: function setHSLInput() {
+      this.refs.$hsl_h.val(this.$store.hsl.h);
+      this.refs.$hsl_s.val(this.$store.hsl.s);
+      this.refs.$hsl_l.val(this.$store.hsl.l);
+      this.refs.$hsl_a.val(this.$store.alpha);
+    }
+  }, {
+    key: 'setHexInput',
+    value: function setHexInput() {
+      this.refs.$hexCode.val(this.$store.dispatch('/toHEX'));
+    }
+  }, {
+    key: 'refresh',
+    value: function refresh() {
+      this.setCurrentFormat(this.$store.format);
+      this.setRGBInput();
+      this.setHSLInput();
+      this.setHexInput();
+    }
+  }]);
+  return ColorInformation;
 }(UIElement);
 
 var DATA_COLORSETS_INDEX = 'data-colorsets-index';
@@ -9120,6 +9248,7 @@ var ColorRing = function (_ColorWheel) {
     return ColorRing;
 }(ColorWheel);
 
+// import ColorWheel from '../ui/ColorWheel'
 var RingColorPicker = function (_BaseColorPicker) {
     inherits(RingColorPicker, _BaseColorPicker);
 

@@ -1,12 +1,11 @@
 import Event from '../../util/Event'
-import UIElement from '../UIElement';
+import UIElement from '../UIElement'
 
-const source = 'chromedevtool-information';
+const source = 'chromedevtool-information'
 
 export default class ColorInformation extends UIElement {
-
-    template () {
-        return `
+  template() {
+    return `
         <div class="information hex">
             <div ref="$informationChange" class="information-change">
                 <button ref="$formatChangeButton" type="button" class="format-change-button arrow-button"></button>
@@ -57,138 +56,156 @@ export default class ColorInformation extends UIElement {
             </div>
         </div>
         `
-    }
-    
-    setCurrentFormat (format) {
-        this.format = format
+  }
 
-        this.initFormat();
-    }
-    
-    initFormat () {
-        var current_format = this.format || 'hex';
-    
-        this.$el.removeClass('hex');
-        this.$el.removeClass('rgb');
-        this.$el.removeClass('hsl');
-        this.$el.addClass(current_format);
-    }
-    
-    nextFormat() {
-        var current_format = this.format || 'hex';
+  setCurrentFormat(format) {
+    this.format = format
 
-        var next_format = 'hex';
-        if (current_format == 'hex') {
-            next_format = 'rgb';
-        } else if (current_format == 'rgb') {
-            next_format = 'hsl';
-        } else if (current_format == 'hsl') {
-            if (this.$store.alpha == 1) {
-                next_format = 'hex';
-            } else {
-                next_format = 'rgb';
-            }
-        }
+    this.initFormat()
+  }
 
-        this.$el.removeClass(current_format);
-        this.$el.addClass(next_format);
-        this.format = next_format;
+  initFormat() {
+    var current_format = this.format || 'hex'
 
-        this.$store.dispatch('/changeFormat', this.format);
-    }
-    
-    getFormat () {
-        return this.format || 'hex';   
+    this.$el.removeClass('hex')
+    this.$el.removeClass('rgb')
+    this.$el.removeClass('hsl')
+    this.$el.addClass(current_format)
+  }
+
+  nextFormat() {
+    var current_format = this.format || 'hex'
+
+    var next_format = 'hex'
+    if (current_format == 'hex') {
+      next_format = 'rgb'
+    } else if (current_format == 'rgb') {
+      next_format = 'hsl'
+    } else if (current_format == 'hsl') {
+      //if (this.$store.alpha == 1) {
+      next_format = 'hex'
+      //} else {
+      //  next_format = 'rgb'
+      //}
     }
 
-    checkNumberKey(e) {
-        return Event.checkNumberKey(e);
-    }    
+    this.$el.removeClass(current_format)
+    this.$el.addClass(next_format)
+    this.format = next_format
 
-    checkNotNumberKey(e) {
-        return !Event.checkNumberKey(e);
-    }        
+    this.$store.dispatch('/changeFormat', this.format)
+  }
 
-    changeRgbColor () {
-        this.$store.dispatch('/changeColor', {
-            type: 'rgb',
-            r : this.refs.$rgb_r.int(),
-            g : this.refs.$rgb_g.int(),
-            b : this.refs.$rgb_b.int(),
-            a : this.refs.$rgb_a.float(),
-            source
-        })
+  getFormat() {
+    return this.format || 'hex'
+  }
+
+  checkNumberKey(e) {
+    return Event.checkNumberKey(e)
+  }
+
+  checkNotNumberKey(e) {
+    return !Event.checkNumberKey(e)
+  }
+
+  changeRgbColor() {
+    this.$store.dispatch('/changeColor', {
+      type: 'rgb',
+      r: this.refs.$rgb_r.int(),
+      g: this.refs.$rgb_g.int(),
+      b: this.refs.$rgb_b.int(),
+      a: this.refs.$rgb_a.float(),
+      source,
+    })
+  }
+
+  changeHslColor() {
+    this.$store.dispatch('/changeColor', {
+      type: 'hsl',
+      h: this.refs.$hsl_h.int(),
+      s: this.refs.$hsl_s.int(),
+      l: this.refs.$hsl_l.int(),
+      a: this.refs.$hsl_a.float(),
+      source,
+    })
+  }
+
+  '@changeColor'(sourceType) {
+    if (source != sourceType) {
+      this.refresh()
     }
+  }
 
-    changeHslColor () {
-        this.$store.dispatch('/changeColor', {
-            type: 'hsl',
-            h : this.refs.$hsl_h.int(),
-            s : this.refs.$hsl_s.int(),
-            l : this.refs.$hsl_l.int(),
-            a : this.refs.$hsl_a.float(),
-            source
-        })        
-    }    
+  '@initColor'() {
+    this.refresh()
+  }
 
-    '@changeColor' (sourceType) {
-        if (source != sourceType) {
-            this.refresh()
-        }
+  'input $rgb_r'(e) {
+    this.changeRgbColor()
+  }
+  'input $rgb_g'(e) {
+    this.changeRgbColor()
+  }
+  'input $rgb_b'(e) {
+    this.changeRgbColor()
+  }
+  'input $rgb_a'(e) {
+    this.changeRgbColor()
+  }
+
+  'input $hsl_h'(e) {
+    this.changeHslColor()
+  }
+  'input $hsl_s'(e) {
+    this.changeHslColor()
+  }
+  'input $hsl_l'(e) {
+    this.changeHslColor()
+  }
+  'input $hsl_a'(e) {
+    this.changeHslColor()
+  }
+
+  'keydown $hexCode'(e) {
+    if (e.which < 65 || e.which > 70) {
+      return this.checkNumberKey(e)
     }
+  }
 
-    '@initColor' () { this.refresh() }    
+  'keyup $hexCode'(e) {
+    var code = this.refs.$hexCode.val()
 
-    'input $rgb_r' (e) {  this.changeRgbColor(); }
-    'input $rgb_g' (e) {  this.changeRgbColor(); }
-    'input $rgb_b' (e) {  this.changeRgbColor(); }
-    'input $rgb_a' (e) {  this.changeRgbColor(); }  
-    
-    'input $hsl_h' (e) {  this.changeHslColor(); }
-    'input $hsl_s' (e) {  this.changeHslColor(); }
-    'input $hsl_l' (e) {  this.changeHslColor(); }
-    'input $hsl_a' (e) {  this.changeHslColor(); }      
+    if (code.charAt(0) == '#' && (code.length == 7 || code.length == 9)) {
+      this.$store.dispatch('/changeColor', code, source)
+    }
+  }
 
-    'keydown $hexCode' (e) {
-        if(e.which < 65 || e.which > 70) {
-            return this.checkNumberKey(e);
-        }
-    }
-    
-    'keyup $hexCode' (e) {
-        var code = this.refs.$hexCode.val();
-    
-        if(code.charAt(0) == '#' && code.length == 7) {
-            this.$store.dispatch('/changeColor', code, source)
-        }
-    }
-    
-    'click $formatChangeButton' (e) {
-        this.nextFormat();
-    }
+  'click $formatChangeButton'(e) {
+    this.nextFormat()
+  }
 
-    setRGBInput() {
-        this.refs.$rgb_r.val(this.$store.rgb.r);
-        this.refs.$rgb_g.val(this.$store.rgb.g);
-        this.refs.$rgb_b.val(this.$store.rgb.b);
-        this.refs.$rgb_a.val(this.$store.alpha);
-    }
-    
-    setHSLInput() {
-        this.refs.$hsl_h.val(this.$store.hsl.h);
-        this.refs.$hsl_s.val(this.$store.hsl.s);
-        this.refs.$hsl_l.val(this.$store.hsl.l);
-        this.refs.$hsl_a.val(this.$store.alpha);
-    }    
+  setRGBInput() {
+    this.refs.$rgb_r.val(this.$store.rgb.r)
+    this.refs.$rgb_g.val(this.$store.rgb.g)
+    this.refs.$rgb_b.val(this.$store.rgb.b)
+    this.refs.$rgb_a.val(this.$store.alpha)
+  }
 
-    setHexInput () {
-        this.refs.$hexCode.val(this.$store.dispatch('/toHEX'));
-    }
+  setHSLInput() {
+    this.refs.$hsl_h.val(this.$store.hsl.h)
+    this.refs.$hsl_s.val(this.$store.hsl.s)
+    this.refs.$hsl_l.val(this.$store.hsl.l)
+    this.refs.$hsl_a.val(this.$store.alpha)
+  }
 
-    refresh () {
-        this.setCurrentFormat(this.$store.format);
-        this.setRGBInput();
-        this.setHSLInput();
-        this.setHexInput();
-    }
+  setHexInput() {
+    this.refs.$hexCode.val(this.$store.dispatch('/toHEX'))
+  }
+
+  refresh() {
+    this.setCurrentFormat(this.$store.format)
+    this.setRGBInput()
+    this.setHSLInput()
+    this.setHexInput()
+  }
 }

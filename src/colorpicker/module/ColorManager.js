@@ -38,8 +38,11 @@ export default class ColorManager extends BaseModule {
     }
 
     colorObj.source = colorObj.source || source
-
+    // alert(isUndefined(colorObj.a))
     $store.alpha = isUndefined(colorObj.a) ? $store.alpha : colorObj.a
+    //alert($store.alpha)
+    //console.log(colorObj.a)
+
     $store.format =
       colorObj.type != "hsv" ? colorObj.type || $store.format : $store.format
 

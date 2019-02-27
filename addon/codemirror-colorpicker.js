@@ -166,18 +166,6 @@ var math = {
     caculateAngle: caculateAngle
 };
 
-/**
- * @method RGBtoHSV
- *
- * convert rgb to hsv
- *
- * 		color.RGBtoHSV(0, 0, 255) === { h : 240, s : 1, v : 1 } === '#FFFF00'
- *
- * @param {Number} R  red color value
- * @param {Number} G  green color value
- * @param {Number} B  blue color value
- * @return {Object}  hsv color code
- */
 function RGBtoHSV(r, g, b) {
 
     if (arguments.length == 1) {
@@ -489,18 +477,6 @@ var fromLAB = {
     LABtoXYZ: LABtoXYZ
 };
 
-/**
- * @method HSVtoRGB
- *
- * convert hsv to rgb
- *
- * 		color.HSVtoRGB(0,0,1) === #FFFFF === { r : 255, g : 0, b : 0 }
- *
- * @param {Number} H  hue color number  (min : 0, max : 360)
- * @param {Number} S  Saturation number  (min : 0, max : 1)
- * @param {Number} V  Value number 		(min : 0, max : 1 )
- * @returns {Object}
- */
 function HSVtoRGB(h, s, v) {
 
     if (arguments.length == 1) {
@@ -1117,195 +1093,185 @@ var parser = {
   color_split: color_split
 };
 
-/**
- * @deprecated 
- * 
- * instead of this,  use blend function 
- *  
- * @param {*} startColor 
- * @param {*} endColor 
- * @param {*} t 
- */
 function interpolateRGB(startColor, endColor) {
-    var t = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
-    var exportFormat = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'hex';
+  var t = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
+  var exportFormat = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "hex";
 
-    var obj = {
-        r: round(startColor.r + (endColor.r - startColor.r) * t),
-        g: round(startColor.g + (endColor.g - startColor.g) * t),
-        b: round(startColor.b + (endColor.b - startColor.b) * t),
-        a: round(startColor.a + (endColor.a - startColor.a) * t, 100)
-    };
+  var obj = {
+    r: round(startColor.r + (endColor.r - startColor.r) * t),
+    g: round(startColor.g + (endColor.g - startColor.g) * t),
+    b: round(startColor.b + (endColor.b - startColor.b) * t),
+    a: round(startColor.a + (endColor.a - startColor.a) * t, 100)
+  };
 
-    return format(obj, obj.a < 1 ? 'rgb' : exportFormat);
+  return format(obj, obj.a < 1 ? "rgb" : exportFormat);
 }
 
 function scale(scale) {
-    var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
+  var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
 
-    if (!scale) return [];
+  if (!scale) return [];
 
-    if (typeof scale === 'string') {
-        scale = convertMatchesArray(scale);
+  if (typeof scale === "string") {
+    scale = convertMatchesArray(scale);
+  }
+
+  scale = scale || [];
+  var len = scale.length;
+
+  var colors = [];
+  for (var i = 0; i < len - 1; i++) {
+    for (var index = 0; index < count; index++) {
+      colors.push(blend(scale[i], scale[i + 1], index / count));
     }
-
-    scale = scale || [];
-    var len = scale.length;
-
-    var colors = [];
-    for (var i = 0; i < len - 1; i++) {
-        for (var index = 0; index < count; index++) {
-            colors.push(blend(scale[i], scale[i + 1], index / count));
-        }
-    }
-    return colors;
+  }
+  return colors;
 }
 
 function blend(startColor, endColor) {
-    var ratio = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
-    var format$$1 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'hex';
+  var ratio = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
+  var format$$1 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "hex";
 
-    var s = parse(startColor);
-    var e = parse(endColor);
+  var s = parse(startColor);
+  var e = parse(endColor);
 
-    return interpolateRGB(s, e, ratio, format$$1);
+  return interpolateRGB(s, e, ratio, format$$1);
 }
 
 function mix(startcolor, endColor) {
-    var ratio = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
-    var format$$1 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'hex';
+  var ratio = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
+  var format$$1 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "hex";
 
-    return blend(startcolor, endColor, ratio, format$$1);
+  return blend(startcolor, endColor, ratio, format$$1);
 }
 
 /**
- * 
- * @param {Color|String} c 
+ *
+ * @param {Color|String} c
  */
 function contrast(c$$1) {
-    c$$1 = parse(c$$1);
-    return (Math.round(c$$1.r * 299) + Math.round(c$$1.g * 587) + Math.round(c$$1.b * 114)) / 1000;
+  c$$1 = parse(c$$1);
+  return (Math.round(c$$1.r * 299) + Math.round(c$$1.g * 587) + Math.round(c$$1.b * 114)) / 1000;
 }
 
 function contrastColor(c$$1) {
-    return contrast(c$$1) >= 128 ? 'black' : 'white';
+  return contrast(c$$1) >= 128 ? "black" : "white";
 }
 
 function gradient(colors) {
-    var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
+  var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
 
-    colors = parseGradient(colors);
+  colors = parseGradient(colors);
 
-    var newColors = [];
-    var maxCount = count - (colors.length - 1);
-    var allCount = maxCount;
+  var newColors = [];
+  var maxCount = count - (colors.length - 1);
+  var allCount = maxCount;
 
-    for (var i = 1, len = colors.length; i < len; i++) {
+  for (var i = 1, len = colors.length; i < len; i++) {
+    var startColor = colors[i - 1][0];
+    var endColor = colors[i][0];
 
-        var startColor = colors[i - 1][0];
-        var endColor = colors[i][0];
+    // if it is second color
+    var rate = i == 1 ? colors[i][1] : colors[i][1] - colors[i - 1][1];
 
-        // if it is second color
-        var rate = i == 1 ? colors[i][1] : colors[i][1] - colors[i - 1][1];
+    // if it is last color
+    var colorCount = i == colors.length - 1 ? allCount : Math.floor(rate * maxCount);
 
-        // if it is last color 
-        var colorCount = i == colors.length - 1 ? allCount : Math.floor(rate * maxCount);
+    newColors = newColors.concat(scale([startColor, endColor], colorCount), [endColor]);
 
-        newColors = newColors.concat(scale([startColor, endColor], colorCount), [endColor]);
-
-        allCount -= colorCount;
-    }
-    return newColors;
+    allCount -= colorCount;
+  }
+  return newColors;
 }
 
 function scaleHSV(color) {
-    var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'h';
-    var count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 9;
-    var exportFormat = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'rgb';
-    var min = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-    var max = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 1;
-    var dist = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 100;
+  var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "h";
+  var count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 9;
+  var exportFormat = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "rgb";
+  var min = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+  var max = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 1;
+  var dist = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 100;
 
-    var colorObj = parse(color);
-    var hsv = RGBtoHSV(colorObj);
-    var unit = (max - min) * dist / count;
+  var colorObj = parse(color);
+  var hsv = RGBtoHSV(colorObj);
+  var unit = (max - min) * dist / count;
 
-    var results = [];
-    for (var i = 1; i <= count; i++) {
-        hsv[target] = Math.abs((dist - unit * i) / dist);
-        results.push(format(HSVtoRGB(hsv), exportFormat));
-    }
+  var results = [];
+  for (var i = 1; i <= count; i++) {
+    hsv[target] = Math.abs((dist - unit * i) / dist);
+    results.push(format(HSVtoRGB(hsv), exportFormat));
+  }
 
-    return results;
+  return results;
 }
 
 function scaleH(color) {
-    var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 9;
-    var exportFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'rgb';
-    var min = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-    var max = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 360;
+  var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 9;
+  var exportFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "rgb";
+  var min = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+  var max = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 360;
 
-    return scaleHSV(color, 'h', count, exportFormat, min, max, 1);
+  return scaleHSV(color, "h", count, exportFormat, min, max, 1);
 }
 
 function scaleS(color) {
-    var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 9;
-    var exportFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'rgb';
-    var min = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-    var max = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
+  var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 9;
+  var exportFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "rgb";
+  var min = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+  var max = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
 
-    return scaleHSV(color, 's', count, exportFormat, min, max, 100);
+  return scaleHSV(color, "s", count, exportFormat, min, max, 100);
 }
 
 function scaleV(color) {
-    var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 9;
-    var exportFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'rgb';
-    var min = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-    var max = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
+  var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 9;
+  var exportFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "rgb";
+  var min = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+  var max = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
 
-    return scaleHSV(color, 'v', count, exportFormat, min, max, 100);
+  return scaleHSV(color, "v", count, exportFormat, min, max, 100);
 }
 
 /* predefined scale colors */
 scale.parula = function (count) {
-    return scale(['#352a87', '#0f5cdd', '#00b5a6', '#ffc337', '#fdff00'], count);
+  return scale(["#352a87", "#0f5cdd", "#00b5a6", "#ffc337", "#fdff00"], count);
 };
 
 scale.jet = function (count) {
-    return scale(['#00008f', '#0020ff', '#00ffff', '#51ff77', '#fdff00', '#ff0000', '#800000'], count);
+  return scale(["#00008f", "#0020ff", "#00ffff", "#51ff77", "#fdff00", "#ff0000", "#800000"], count);
 };
 
 scale.hsv = function (count) {
-    return scale(['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#ff0000'], count);
+  return scale(["#ff0000", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#ff00ff", "#ff0000"], count);
 };
 
 scale.hot = function (count) {
-    return scale(['#0b0000', '#ff0000', '#ffff00', '#ffffff'], count);
+  return scale(["#0b0000", "#ff0000", "#ffff00", "#ffffff"], count);
 };
 scale.pink = function (count) {
-    return scale(['#1e0000', '#bd7b7b', '#e7e5b2', '#ffffff'], count);
+  return scale(["#1e0000", "#bd7b7b", "#e7e5b2", "#ffffff"], count);
 };
 
 scale.bone = function (count) {
-    return scale(['#000000', '#4a4a68', '#a6c6c6', '#ffffff'], count);
+  return scale(["#000000", "#4a4a68", "#a6c6c6", "#ffffff"], count);
 };
 
 scale.copper = function (count) {
-    return scale(['#000000', '#3d2618', '#9d623e', '#ffa167', '#ffc77f'], count);
+  return scale(["#000000", "#3d2618", "#9d623e", "#ffa167", "#ffc77f"], count);
 };
 
 var mixin = {
-    interpolateRGB: interpolateRGB,
-    blend: blend,
-    mix: mix,
-    scale: scale,
-    contrast: contrast,
-    contrastColor: contrastColor,
-    gradient: gradient,
-    scaleHSV: scaleHSV,
-    scaleH: scaleH,
-    scaleS: scaleS,
-    scaleV: scaleV
+  interpolateRGB: interpolateRGB,
+  blend: blend,
+  mix: mix,
+  scale: scale,
+  contrast: contrast,
+  contrastColor: contrastColor,
+  gradient: gradient,
+  scaleHSV: scaleHSV,
+  scaleH: scaleH,
+  scaleS: scaleS,
+  scaleV: scaleV
 };
 
 function array_equals(v1, v2) {
@@ -1946,7 +1912,6 @@ function crop() {
     };
 }
 
-// Image manupulate 
 function resize(dstWidth, dstHeight) {
     return function (bitmap, done) {
         var c = Canvas.drawPixels(bitmap);
@@ -2172,9 +2137,6 @@ function bitonal(darkColor, lightColor) {
     });
 }
 
-/*
- * @param {Number} amount  -100..100  ,  value < 0  is darken, value > 0 is brighten 
- */
 function brightness$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -2202,10 +2164,6 @@ function brownie() {
     });
 }
 
-/**
- * 
- * @param {Number} amount from 0 to 100 
- */
 function clip() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -2220,10 +2178,6 @@ function clip() {
     }, { $C: $C });
 }
 
-/**
- * 
- * @param {*} amount   min = -128, max = 128 
- */
 function contrast$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -2248,10 +2202,6 @@ function gamma() {
     }, { $C: $C });
 }
 
-/**
- * F.gradient('red', 'blue', 'yellow', 'white', 10)
- * F.gradient('red, blue, yellow, white, 10')
- */
 function gradient$1() {
     // 전체 매개변수 기준으로 파싱 
     // 색이 아닌 것 기준으로 scale 변수로 인식 
@@ -2323,9 +2273,6 @@ function grayscale(amount) {
     });
 }
 
-/*
- * @param {Number} amount   0..360  
- */
 function hue() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 360;
 
@@ -2409,10 +2356,6 @@ function matrix() {
     });
 }
 
-/**
- * 
- * @param {Number} amount 1..100
- */
 function noise() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -2456,9 +2399,6 @@ function polaroid() {
     });
 }
 
-/*
- * @param {Number} amount  -100..100 
- */
 function saturation() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
 
@@ -2478,9 +2418,6 @@ function saturation() {
     });
 }
 
-/*
- * @param {Number} amount  0..1 
- */
 function sepia() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -2533,12 +2470,6 @@ function shift() {
     });
 }
 
-/**
- * change the relative darkness of (a part of an image) by overexposure to light.
- * @param {*} r 
- * @param {*} g 
- * @param {*} b 
- */
 function solarize(redValue, greenValue, blueValue) {
     var $redValue = parseParamNumber(redValue);
     var $greenValue = parseParamNumber(greenValue);
@@ -2598,9 +2529,6 @@ function thresholdColor() {
     });
 }
 
-/*
- * @param {Number} amount  0..100 
- */
 function threshold() {
   var scale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 200;
   var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
@@ -2662,11 +2590,6 @@ function blur () {
     return convolution(createBlurMatrix(amount));
 }
 
-/*
- * carve, mold, or stamp a design on (a surface) so that it stands out in relief.
- * 
- * @param {Number} amount   0.0 .. 4.0 
- */
 function emboss() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
 
@@ -4240,11 +4163,6 @@ function normal () {
     return convolution$1([0, 0, 0, 0, 1, 0, 0, 0, 0]);
 }
 
-/*
- * carve, mold, or stamp a design on (a surface) so that it stands out in relief.
- * 
- * @param {Number} amount   0.0 .. 4.0 
- */
 function emboss$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
 
@@ -4252,10 +4170,6 @@ function emboss$1() {
     return convolution$1([amount * -2.0, -amount, 0.0, -amount, 1.0, amount, 0.0, amount, amount * 2.0]);
 }
 
-/**
- * 
- * @param {Number} amount 0..1
- */
 function gaussianBlur$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4372,9 +4286,6 @@ function bitonal$1(darkColor, lightColor) {
     return shader('\n        if ((pixelColor.r + pixelColor.g + pixelColor.b) > ' + checkVlue + ') {\n            outColor = vec4(' + lightColorString + '.rgb, pixelColor.a);\n        } else {\n            outColor = vec4(' + darkColorString + '.rgb, pixelColor.a);\n        }\n    ');
 }
 
-/*
- * @param {Number} amount  -1..1  ,  value < 0  is darken, value > 0 is brighten 
- */
 function brightness$2() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4412,9 +4323,6 @@ function brownie$1() {
     return matrix$3(0.5997023498159715, 0.34553243048391263, -0.2708298674538042, 0, -0.037703249837783157, 0.8609577587992641, 0.15059552388459913, 0, 0.24113635128153335, -0.07441037908422492, 0.44972182064877153, 0, 0, 0, 0, 1);
 }
 
-/*
- * @param {Number} amount 0..1
- */
 function clip$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -4431,9 +4339,6 @@ function chaos() {
     return shader('\n        vec2 st = pixelColor.st;\n        st *= ' + C + ';\n        \n        vec2 ipos = floor(st);  // get the integer coords\n\n        vec3 color = vec3(random( ipos ));\n\n        outColor = vec4(color, pixelColor.a);\n    ');
 }
 
-/*
- * @param {Number} amount  0..1
- */
 function contrast$2() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4442,9 +4347,6 @@ function contrast$2() {
     return shader('\n        outColor = pixelColor * ' + C + ';\n    ');
 }
 
-/*
- * @param {Number} amount  -1..1  ,  value < 0  is darken, value > 0 is brighten 
- */
 function gamma$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4453,10 +4355,6 @@ function gamma$1() {
     return shader('\n        outColor = vec4(pow(pixelColor.r, ' + C + '), pow(pixelColor.g, ' + C + '), pow(pixelColor.b, ' + C + '), pixelColor.a );\n    ');
 }
 
-/**
- * F.gradient('red', 'blue', 'yellow', 'white', 10)
- * F.gradient('red, blue, yellow, white, 10')
- */
 function gradient$2() {
     // 전체 매개변수 기준으로 파싱 
     // 색이 아닌 것 기준으로 scale 변수로 인식 
@@ -4504,10 +4402,6 @@ function gradient$2() {
     return shader('\n        float rate = (pixelColor.r * 0.2126 + pixelColor.g * 0.7152 + pixelColor.b * 0.0722); \n\n        ' + temp.join('\n') + '        \n    ');
 }
 
-/**
- * 
- * @param {Number} amount 0..1
- */
 function grayscale$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4519,9 +4413,6 @@ function grayscale$1() {
 }
 
 //http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
-/*
- * @param {Number} amount  0..1  ,  (real value 0..360)
- */
 function hue$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4543,10 +4434,6 @@ function kodachrome$1() {
     return matrix$3(1.1285582396593525, -0.3967382283601348, -0.03992559172921793, 0, -0.16404339962244616, 1.0835251566291304, -0.05498805115633132, 0, -0.16786010706155763, -0.5603416277695248, 1.6014850761964943, 0, 0, 0, 0, 1);
 }
 
-/**
- * 
- * @param {Number} amount 0..1
- */
 function noise$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4557,10 +4444,6 @@ function noise$1() {
     return shader('\n        float rnd = ' + min + ' + random( pixelColor.st ) * (' + max + ' - ' + min + ');\n\n        outColor = vec4(pixelColor.rgb + rnd, 1.0);\n    ');
 }
 
-/**
- * 
- * @param {Number} amount 0..1
- */
 function opacity$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4574,9 +4457,6 @@ function polaroid$1() {
     return matrix$3(1.438, -0.062, -0.062, 0, -0.122, 1.378, -0.122, 0, -0.016, -0.016, 1.483, 0, 0, 0, 0, 1);
 }
 
-/*
- * @param {Number} amount  0..1 
- */
 function saturation$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -4585,9 +4465,6 @@ function saturation$1() {
     return matrix$3(L, 0, 0, 0, 0, L, 0, 0, 0, 0, L, 0, 0, 0, 0, L);
 }
 
-/*
- * @param {Number} amount  0..100 
- */
 function sepia$1() {
     var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
@@ -4635,9 +4512,6 @@ function thresholdColor$1() {
     return shader('\n        float c = ( (pixelColor.r * 0.2126 + pixelColor.g * 0.7152 + pixelColor.b * 0.0722) ) >= ' + scale + ' ? 1.0 : 0.0;\n\n        outColor = vec4(c, c, c, pixelColor.a);\n    ');
 }
 
-/*
- * @param {Number} amount  0..100 
- */
 function threshold$1() {
   var scale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 200;
   var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
@@ -4645,12 +4519,6 @@ function threshold$1() {
   return thresholdColor$1(scale, amount, false);
 }
 
-/**
- * 
- * @param {*} redTint  0..1
- * @param {*} greenTint 0..1
- * @param {*} blueTint 0..1
- */
 function tint$1 () {
     var redTint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var greenTint = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -5584,43 +5452,43 @@ var image = {
 
 var Color$1 = _extends({}, formatter, math, mixin, parser, fromYCrCb, fromRGB, fromCMYK, fromHSV, fromHSL, fromLAB, image);
 
-var hue_color = [{ rgb: '#ff0000', start: .0 }, { rgb: '#ffff00', start: .17 }, { rgb: '#00ff00', start: .33 }, { rgb: '#00ffff', start: .50 }, { rgb: '#0000ff', start: .67 }, { rgb: '#ff00ff', start: .83 }, { rgb: '#ff0000', start: 1 }];
+var hue_color = [{ rgb: "#ff0000", start: 0.0 }, { rgb: "#ffff00", start: 0.17 }, { rgb: "#00ff00", start: 0.33 }, { rgb: "#00ffff", start: 0.5 }, { rgb: "#0000ff", start: 0.67 }, { rgb: "#ff00ff", start: 0.83 }, { rgb: "#ff0000", start: 1 }];
 
 function checkHueColor(p) {
-    var startColor, endColor;
+  var startColor, endColor;
 
-    for (var i = 0; i < hue_color.length; i++) {
-        if (hue_color[i].start >= p) {
-            startColor = hue_color[i - 1];
-            endColor = hue_color[i];
-            break;
-        }
+  for (var i = 0; i < hue_color.length; i++) {
+    if (hue_color[i].start >= p) {
+      startColor = hue_color[i - 1];
+      endColor = hue_color[i];
+      break;
     }
+  }
 
-    if (startColor && endColor) {
-        return Color$1.interpolateRGB(startColor, endColor, (p - startColor.start) / (endColor.start - startColor.start));
-    }
+  if (startColor && endColor) {
+    return Color$1.interpolateRGB(startColor, endColor, (p - startColor.start) / (endColor.start - startColor.start));
+  }
 
-    return hue_color[0].rgb;
+  return hue_color[0].rgb;
 }
 
 function initHueColors() {
-    for (var i = 0, len = hue_color.length; i < len; i++) {
-        var hue = hue_color[i];
+  for (var i = 0, len = hue_color.length; i < len; i++) {
+    var hue = hue_color[i];
 
-        var obj = Color$1.parse(hue.rgb);
+    var obj = Color$1.parse(hue.rgb);
 
-        hue.r = obj.r;
-        hue.g = obj.g;
-        hue.b = obj.b;
-    }
+    hue.r = obj.r;
+    hue.g = obj.g;
+    hue.b = obj.b;
+  }
 }
 
 initHueColors();
 
 var HueColor = {
-    colors: hue_color,
-    checkHueColor: checkHueColor
+  colors: hue_color,
+  checkHueColor: checkHueColor
 };
 
 // TODO: worker run 
@@ -6802,8 +6670,11 @@ var ColorManager = function (_BaseModule) {
       }
 
       colorObj.source = colorObj.source || source;
-
+      // alert(isUndefined(colorObj.a))
       $store.alpha = isUndefined(colorObj.a) ? $store.alpha : colorObj.a;
+      //alert($store.alpha)
+      //console.log(colorObj.a)
+
       $store.format = colorObj.type != "hsv" ? colorObj.type || $store.format : $store.format;
 
       if (colorObj.type == "hsl") {
@@ -8624,149 +8495,151 @@ var ColorControl$2 = function (_UIElement) {
     return ColorControl;
 }(UIElement);
 
-var source$4 = 'chromedevtool-palette';
+var source$4 = "chromedevtool-palette";
 
 var ColorPalette = function (_UIElement) {
-    inherits(ColorPalette, _UIElement);
+  inherits(ColorPalette, _UIElement);
 
-    function ColorPalette() {
-        classCallCheck(this, ColorPalette);
-        return possibleConstructorReturn(this, (ColorPalette.__proto__ || Object.getPrototypeOf(ColorPalette)).apply(this, arguments));
+  function ColorPalette() {
+    classCallCheck(this, ColorPalette);
+    return possibleConstructorReturn(this, (ColorPalette.__proto__ || Object.getPrototypeOf(ColorPalette)).apply(this, arguments));
+  }
+
+  createClass(ColorPalette, [{
+    key: "template",
+    value: function template() {
+      return "\n        <div class=\"color\">\n            <div ref=\"$saturation\" class=\"saturation\">\n                <div ref=\"$value\" class=\"value\">\n                    <div ref=\"$drag_pointer\" class=\"drag-pointer\"></div>\n                </div>\n            </div>        \n        </div>        \n        ";
     }
+  }, {
+    key: "setBackgroundColor",
+    value: function setBackgroundColor(color) {
+      this.$el.css("background-color", color.substring(0, 7));
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this.setColorUI();
+    }
+  }, {
+    key: "caculateSV",
+    value: function caculateSV() {
+      var pos = this.drag_pointer_pos || { x: 0, y: 0 };
 
-    createClass(ColorPalette, [{
-        key: 'template',
-        value: function template() {
-            return '\n        <div class="color">\n            <div ref="$saturation" class="saturation">\n                <div ref="$value" class="value">\n                    <div ref="$drag_pointer" class="drag-pointer"></div>\n                </div>\n            </div>        \n        </div>        \n        ';
-        }
-    }, {
-        key: 'setBackgroundColor',
-        value: function setBackgroundColor(color) {
-            this.$el.css("background-color", color);
-        }
-    }, {
-        key: 'refresh',
-        value: function refresh() {
-            this.setColorUI();
-        }
-    }, {
-        key: 'caculateSV',
-        value: function caculateSV() {
-            var pos = this.drag_pointer_pos || { x: 0, y: 0 };
+      var width = this.state.get("$el.width");
+      var height = this.state.get("$el.height");
 
-            var width = this.state.get('$el.width');
-            var height = this.state.get('$el.height');
+      var s = pos.x / width;
+      var v = (height - pos.y) / height;
 
-            var s = pos.x / width;
-            var v = (height - pos.y) / height;
+      this.$store.dispatch("/changeColor", {
+        type: "hsv",
+        s: s,
+        v: v,
+        source: source$4
+      });
+    }
+  }, {
+    key: "setColorUI",
+    value: function setColorUI() {
+      var x = this.state.get("$el.width") * this.$store.hsv.s,
+          y = this.state.get("$el.height") * (1 - this.$store.hsv.v);
 
-            this.$store.dispatch('/changeColor', {
-                type: 'hsv',
-                s: s,
-                v: v,
-                source: source$4
-            });
-        }
-    }, {
-        key: 'setColorUI',
-        value: function setColorUI() {
-            var x = this.state.get('$el.width') * this.$store.hsv.s,
-                y = this.state.get('$el.height') * (1 - this.$store.hsv.v);
+      this.refs.$drag_pointer.css({
+        left: x + "px",
+        top: y + "px"
+      });
 
-            this.refs.$drag_pointer.css({
-                left: x + "px",
-                top: y + "px"
-            });
+      this.drag_pointer_pos = { x: x, y: y };
 
-            this.drag_pointer_pos = { x: x, y: y };
+      this.setBackgroundColor(this.$store.dispatch("/getHueColor"));
+    }
+  }, {
+    key: "setMainColor",
+    value: function setMainColor(e) {
+      // e.preventDefault();
+      var pos = this.$el.offset(); // position for screen
+      var w = this.state.get("$el.contentWidth");
+      var h = this.state.get("$el.contentHeight");
 
-            this.setBackgroundColor(this.$store.dispatch('/getHueColor'));
-        }
-    }, {
-        key: 'setMainColor',
-        value: function setMainColor(e) {
-            // e.preventDefault();
-            var pos = this.$el.offset(); // position for screen
-            var w = this.state.get('$el.contentWidth');
-            var h = this.state.get('$el.contentHeight');
+      var x = Event.pos(e).pageX - pos.left;
+      var y = Event.pos(e).pageY - pos.top;
 
-            var x = Event.pos(e).pageX - pos.left;
-            var y = Event.pos(e).pageY - pos.top;
+      if (x < 0) x = 0;else if (x > w) x = w;
 
-            if (x < 0) x = 0;else if (x > w) x = w;
+      if (y < 0) y = 0;else if (y > h) y = h;
 
-            if (y < 0) y = 0;else if (y > h) y = h;
+      this.refs.$drag_pointer.css({
+        left: x + "px",
+        top: y + "px"
+      });
 
-            this.refs.$drag_pointer.css({
-                left: x + 'px',
-                top: y + 'px'
-            });
+      this.drag_pointer_pos = { x: x, y: y
 
-            this.drag_pointer_pos = { x: x, y: y };
+        //alert(this.$store.dispatch("/getHueColor"))
 
-            this.caculateSV();
-        }
-    }, {
-        key: '@changeColor',
-        value: function changeColor(sourceType) {
-            if (source$4 != sourceType) {
-                this.refresh();
-            }
-        }
-    }, {
-        key: '@initColor',
-        value: function initColor() {
-            this.refresh();
-        }
-    }, {
-        key: 'mouseup document',
-        value: function mouseupDocument(e) {
-            this.isDown = false;
-        }
-    }, {
-        key: 'mousemove document',
-        value: function mousemoveDocument(e) {
-            if (this.isDown) {
-                this.setMainColor(e);
-            }
-        }
-    }, {
-        key: 'mousedown',
-        value: function mousedown(e) {
-            this.isDown = true;
-            this.setMainColor(e);
-        }
-    }, {
-        key: 'mouseup',
-        value: function mouseup(e) {
-            this.isDown = false;
-        }
-    }, {
-        key: 'touchend document',
-        value: function touchendDocument(e) {
-            this.isDown = false;
-        }
-    }, {
-        key: 'touchmove document',
-        value: function touchmoveDocument(e) {
-            if (this.isDown) {
-                this.setMainColor(e);
-            }
-        }
-    }, {
-        key: 'touchstart',
-        value: function touchstart(e) {
-            e.preventDefault();
-            this.isDown = true;
-            this.setMainColor(e);
-        }
-    }, {
-        key: 'touchend',
-        value: function touchend(e) {
-            this.isDown = false;
-        }
-    }]);
-    return ColorPalette;
+      };this.caculateSV();
+    }
+  }, {
+    key: "@changeColor",
+    value: function changeColor(sourceType) {
+      if (source$4 != sourceType) {
+        this.refresh();
+      }
+    }
+  }, {
+    key: "@initColor",
+    value: function initColor() {
+      this.refresh();
+    }
+  }, {
+    key: "mouseup document",
+    value: function mouseupDocument(e) {
+      this.isDown = false;
+    }
+  }, {
+    key: "mousemove document",
+    value: function mousemoveDocument(e) {
+      if (this.isDown) {
+        this.setMainColor(e);
+      }
+    }
+  }, {
+    key: "mousedown",
+    value: function mousedown(e) {
+      this.isDown = true;
+      this.setMainColor(e);
+    }
+  }, {
+    key: "mouseup",
+    value: function mouseup(e) {
+      this.isDown = false;
+    }
+  }, {
+    key: "touchend document",
+    value: function touchendDocument(e) {
+      this.isDown = false;
+    }
+  }, {
+    key: "touchmove document",
+    value: function touchmoveDocument(e) {
+      if (this.isDown) {
+        this.setMainColor(e);
+      }
+    }
+  }, {
+    key: "touchstart",
+    value: function touchstart(e) {
+      e.preventDefault();
+      this.isDown = true;
+      this.setMainColor(e);
+    }
+  }, {
+    key: "touchend",
+    value: function touchend(e) {
+      this.isDown = false;
+    }
+  }]);
+  return ColorPalette;
 }(UIElement);
 
 var ChromeDevToolColorPicker = function (_BaseColorPicker) {
@@ -9248,7 +9121,6 @@ var ColorRing = function (_ColorWheel) {
     return ColorRing;
 }(ColorWheel);
 
-// import ColorWheel from '../ui/ColorWheel'
 var RingColorPicker = function (_BaseColorPicker) {
     inherits(RingColorPicker, _BaseColorPicker);
 
